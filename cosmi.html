@@ -1,0 +1,2559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heppy Borthday 💙</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#02000a;--gold:#f5c842;--rose:#ff8fb0;
+  --lavender:#c09cf0;--aurora:#74f0d8;
+  --text:rgba(255,255,255,0.88);--text-dim:rgba(255,255,255,0.42);
+  --cat-dark:#180a36;
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
+  font-family:'Crimson Pro',serif;overflow:hidden;user-select:none;}
+
+/* ── canvases ── */
+#bgCanvas{position:fixed;inset:0;z-index:0;width:100%;height:100%;
+  transition:opacity 0.8s ease,filter 1.8s ease;}
+#cakeCanvas{position:fixed;inset:0;z-index:5;width:100%;height:100%;
+  pointer-events:none;transition:opacity 1.8s ease;}
+#sparkCanvas{position:fixed;inset:0;z-index:55;pointer-events:none;width:100%;height:100%;}
+
+/* ── phases ── */
+.phase{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;padding-bottom:5vh;
+  opacity:0;pointer-events:none;
+  transform:translateY(14px) scale(0.985);
+  transition:opacity 1.35s cubic-bezier(0.22,0.9,0.36,1),
+             transform 1.35s cubic-bezier(0.22,0.9,0.36,1);}
+.phase.active{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+/* letter phase keeps its own centering — no cake visible there */
+#phase10{justify-content:center;padding-bottom:0;overflow-y:auto;padding:2rem 1.5rem;}
+
+/* ── typewriter lines ── */
+.tw-wrap{text-align:center;padding:1rem 2rem;max-width:700px;}
+.tw-line{display:block;font-family:'Crimson Pro',serif;font-style:italic;font-weight:300;
+  font-size:clamp(1rem,2.9vw,1.82rem);line-height:2.1;color:var(--text);
+  min-height:2em;opacity:0;
+  transform:translateY(10px);
+  text-shadow:0 0 0px rgba(245,200,66,0);
+  transition:opacity 0.75s cubic-bezier(0.22,0.9,0.36,1),
+             transform 0.75s cubic-bezier(0.22,0.9,0.36,1),
+             text-shadow 1.2s ease;}
+.tw-line.on{opacity:1;transform:translateY(0);
+  text-shadow:0 0 28px rgba(245,200,66,0.13),0 0 60px rgba(192,156,240,0.07);}
+
+/* ── counter ── */
+.counter-block{margin:1.8rem 0 0.5rem;text-align:center;opacity:0;
+  transform:translateY(12px);transition:opacity 0.9s ease,transform 0.9s ease;}
+.counter-block.show{opacity:1;transform:translateY(0);}
+.counter-label{font-family:'Crimson Pro',serif;font-size:0.68rem;letter-spacing:0.5em;
+  color:var(--text-dim);text-transform:uppercase;margin-bottom:0.6rem;}
+.counter-value{font-family:'Dancing Script',cursive;font-size:clamp(1.8rem,5.5vw,3.6rem);
+  color:var(--gold);letter-spacing:0.08em;
+  text-shadow:0 0 40px rgba(245,200,66,0.45),0 0 80px rgba(245,200,66,0.15);
+  transition:text-shadow 0.4s ease;}
+.counter-value.flash{text-shadow:0 0 80px rgba(245,200,66,0.9),0 0 140px rgba(245,200,66,0.5);}
+.counter-time{font-family:'Dancing Script',cursive;font-size:clamp(1rem,2.8vw,2rem);
+  color:rgba(245,200,66,0.55);letter-spacing:0.22em;margin-top:0.45rem;
+  text-shadow:0 0 20px rgba(245,200,66,0.25);min-height:1.6em;}
+
+/* ── buttons ── */
+.btn-soft{margin-top:2.8rem;padding:0.72rem 2.4rem;background:transparent;
+  border:1px solid rgba(255,255,255,0.16);color:rgba(255,255,255,0.52);
+  font-family:'Crimson Pro',serif;font-style:italic;font-size:1rem;
+  letter-spacing:0.18em;cursor:pointer;border-radius:100px;opacity:0;
+  transform:translateY(12px) scale(0.95);
+  overflow:hidden;position:relative;
+  transition:opacity 1s cubic-bezier(0.22,0.9,0.36,1),
+             transform 1s cubic-bezier(0.22,0.9,0.36,1),
+             border-color 0.35s,color 0.35s,background 0.35s,
+             box-shadow 0.35s;}
+.btn-soft::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,0.08) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform 0s;}
+.btn-soft:hover::before{transform:translateX(100%);transition:transform 0.55s ease;}
+.btn-soft.show{opacity:1;transform:translateY(0) scale(1);}
+.btn-soft:hover{border-color:rgba(245,200,66,0.45);color:rgba(255,255,255,0.92);
+  background:rgba(245,200,66,0.06);
+  box-shadow:0 0 22px rgba(245,200,66,0.12),0 0 44px rgba(245,200,66,0.05);}
+
+/* ── phase 2 ── */
+#p2hint{position:absolute;top:11%;left:50%;transform:translateX(-50%);
+  font-style:italic;font-size:clamp(0.82rem,2vw,1.05rem);color:var(--text-dim);
+  letter-spacing:0.22em;opacity:0;transition:opacity 0.8s ease;
+  pointer-events:none;white-space:nowrap;}
+.p2-note{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);
+  font-style:italic;font-size:0.85rem;color:rgba(255,255,255,0.28);
+  letter-spacing:0.2em;opacity:0;transition:opacity 0.7s ease;
+  pointer-events:none;white-space:nowrap;}
+.p2-note.show{opacity:1;}
+
+/* ── knife ── */
+#knifeWrap{position:fixed;z-index:35;width:44px;height:120px;cursor:grab;
+  touch-action:none;display:none;opacity:0;transition:opacity 0.6s ease;
+  filter:drop-shadow(0 4px 14px rgba(245,200,66,0.22));}
+#knifeWrap:active{cursor:grabbing;}
+#knifeWrap.lit{filter:drop-shadow(0 6px 22px rgba(245,200,66,0.5));}
+.t-flash{position:fixed;inset:0;z-index:200;background:rgba(255,255,255,0.18);
+  pointer-events:none;animation:flashOut 0.35s ease forwards;}
+@keyframes flashOut{to{opacity:0;}}
+
+/* ── cat ── */
+#catWrap{position:fixed;z-index:80;width:92px;height:115px;
+  transition:left 1.3s cubic-bezier(0.34,1.08,0.64,1);pointer-events:none;}
+#speechBubble{position:absolute;bottom:calc(100% + 6px);right:-22px;
+  background:rgba(8,4,22,0.82);backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.13);border-radius:16px 16px 4px 16px;
+  padding:0.6rem 1rem;font-family:'Crimson Pro',serif;font-size:0.88rem;
+  line-height:1.55;color:rgba(255,255,255,0.88);max-width:215px;
+  white-space:pre-line;text-align:center;opacity:0;
+  transform:translateY(10px) scale(0.88);
+  transition:opacity 0.42s cubic-bezier(0.34,1.56,0.64,1),
+             transform 0.42s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4),0 0 0 0.5px rgba(255,255,255,0.06);}
+#speechBubble.on{opacity:1;transform:translateY(0) scale(1);}
+@keyframes tailWag{0%,100%{transform:rotate(-18deg);}50%{transform:rotate(14deg) translateX(3px);}}
+@keyframes catIdle{
+  0%,100%{transform:translateY(0) scale(1,1);}
+  30%{transform:translateY(-4px) scale(1.01,0.99);}
+  60%{transform:translateY(-5px) scale(0.99,1.01);}
+  80%{transform:translateY(-2px) scale(1,1);}}
+@keyframes catTalk{0%,100%{transform:translateY(0) rotate(0);}33%{transform:translateY(-2px) rotate(-1.2deg);}66%{transform:translateY(-2px) rotate(1.2deg);}}
+@keyframes catWalk{0%,100%{transform:translateY(0) rotate(0);}25%{transform:translateY(-4px) rotate(-1.5deg);}75%{transform:translateY(-4px) rotate(1.5deg);}}
+#catSvg{display:block;}
+#catSvg.idle{animation:catIdle 3.6s cubic-bezier(0.45,0.05,0.55,0.95) infinite;}
+#catSvg.talking{animation:catTalk 0.48s ease-in-out infinite;}
+#catSvg.walking{animation:catWalk 0.44s ease-in-out infinite;}
+#cat-tail{transform-origin:58px 88px;animation:tailWag 2.4s cubic-bezier(0.45,0.05,0.55,0.95) infinite;}
+.cat-e{display:none;}.cat-e.on{display:block;}
+
+/* ── cosmos ── */
+#cosmosScene{position:fixed;inset:0;z-index:25;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;opacity:0;pointer-events:none;
+  transition:opacity 2.2s cubic-bezier(0.22,0.9,0.36,1);
+  background:radial-gradient(ellipse at 50% 45%,rgba(18,4,52,0.82) 0%,rgba(4,1,18,0.92) 60%,rgba(2,0,10,0.98) 100%);}
+#cosmosScene.active{opacity:1;pointer-events:all;}
+#breathUI{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2.5rem;transition:opacity 1s ease;}
+#breathUI.gone{opacity:0;pointer-events:none;}
+.breath-ring{width:140px;height:140px;border-radius:50%;
+  border:1px solid rgba(100,240,216,0.3);
+  box-shadow:0 0 38px rgba(100,240,216,0.09),inset 0 0 24px rgba(100,240,216,0.05);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 3.4s cubic-bezier(0.45,0.05,0.55,0.95),
+    border-color 3.4s ease,box-shadow 3.4s ease;}
+.breath-ring.expand{transform:scale(2.1);border-color:rgba(100,240,216,0.65);
+  box-shadow:0 0 110px rgba(100,240,216,0.28),0 0 200px rgba(80,40,160,0.15),
+             inset 0 0 50px rgba(100,240,216,0.14);}
+@keyframes auroraScreenPulse{
+  0%{box-shadow:inset 0 0 0 rgba(100,240,216,0);}
+  50%{box-shadow:inset 0 0 180px rgba(100,240,216,0.04),inset 0 0 80px rgba(80,40,200,0.06);}
+  100%{box-shadow:inset 0 0 0 rgba(100,240,216,0);}}
+#cosmosScene.active{animation:auroraScreenPulse 7s ease-in-out infinite;}
+.breath-dot{width:7px;height:7px;border-radius:50%;background:rgba(100,240,216,0.85);
+  box-shadow:0 0 18px rgba(100,240,216,0.9),0 0 36px rgba(100,240,216,0.4);}
+.breath-text{font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:clamp(0.75rem,1.8vw,0.95rem);letter-spacing:0.55em;
+  color:rgba(255,255,255,0.38);text-align:center;min-height:1.5em;
+  transition:opacity 0.6s ease;}
+#revealUI{display:none;flex-direction:column;align-items:center;
+  transition:opacity 0.9s ease;}
+#revealUI.show{display:flex;}
+#wishUI{display:none;flex-direction:column;align-items:center;gap:1.4rem;
+  max-width:480px;text-align:center;transition:opacity 0.9s ease;}
+#wishUI.show{display:flex;}
+.wish-title{font-family:'Dancing Script',cursive;font-size:clamp(1.5rem,4.5vw,2.8rem);
+  color:rgba(245,200,66,0.85);text-shadow:0 0 35px rgba(245,200,66,0.32);
+  opacity:0;transform:translateY(8px);transition:opacity 1s ease,transform 1s ease;}
+.wish-title.on{opacity:1;transform:translateY(0);}
+#whisperLine{font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:clamp(0.85rem,2vw,1.08rem);color:rgba(255,255,255,0.44);
+  letter-spacing:0.28em;min-height:1.8em;text-align:center;
+  opacity:0;transition:opacity 0.42s ease;}
+#whisperLine.on{opacity:1;}
+#wishOrbWrap{margin-top:0.8rem;display:flex;align-items:center;justify-content:center;
+  position:relative;opacity:0;transition:opacity 1.2s ease;}
+.wish-orb{width:74px;height:74px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,200,66,0.09),rgba(192,156,240,0.06),transparent 70%);
+  border:1px solid rgba(245,200,66,0.38);color:var(--gold);font-size:1.55rem;
+  cursor:pointer;animation:wishPulse 2.4s ease-in-out infinite;
+  position:relative;z-index:2;transition:transform 0.28s;}
+.wish-orb:hover{transform:scale(1.1);}
+@keyframes wishPulse{
+  0%,100%{box-shadow:0 0 16px rgba(245,200,66,0.18);}
+  50%{box-shadow:0 0 38px rgba(245,200,66,0.36),0 0 70px rgba(192,156,240,0.16);}}
+.orb-ring{position:absolute;width:112px;height:112px;border-radius:50%;
+  border:1px solid rgba(245,200,66,0.12);
+  animation:orbRingPulse 2.4s ease-in-out infinite;}
+@keyframes orbRingPulse{
+  0%,100%{transform:scale(1);opacity:0.5;}
+  50%{transform:scale(1.12);opacity:0.22;}}
+#wishMadeBanner{position:fixed;z-index:300;top:26%;left:50%;
+  transform:translateX(-50%) scale(0.86);font-family:'Dancing Script',cursive;
+  font-size:clamp(2.2rem,7vw,5rem);color:var(--gold);
+  text-shadow:0 0 55px rgba(245,200,66,0.6),0 0 100px rgba(245,200,66,0.25);
+  white-space:nowrap;letter-spacing:0.06em;opacity:0;pointer-events:none;
+  transition:opacity 0.7s ease,transform 0.7s ease;}
+#wishMadeBanner.on{opacity:1;transform:translateX(-50%) scale(1);}
+
+/* ── memory stars ── */
+@keyframes starTwinkleIn{
+  0%{opacity:0;transform:scale(0) rotate(-20deg);}
+  60%{opacity:1;transform:scale(1.28) rotate(6deg);}
+  80%{transform:scale(0.92) rotate(-3deg);}
+  100%{opacity:1;transform:scale(1) rotate(0deg);}}
+@keyframes svgStarSpin{
+  from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes svgStarPulse{
+  0%,100%{opacity:0.35;r:9;}
+  50%{opacity:0.65;r:11;}}
+@keyframes svgCorona{
+  0%,100%{opacity:0.18;transform:scale(1);}
+  50%{opacity:0.42;transform:scale(1.22);}}
+@keyframes svgStarGlow{
+  0%,100%{filter:drop-shadow(0 0 4px rgba(245,200,66,0.7)) drop-shadow(0 0 8px rgba(245,200,66,0.4));}
+  50%{filter:drop-shadow(0 0 10px rgba(245,200,66,1)) drop-shadow(0 0 22px rgba(245,200,66,0.65)) drop-shadow(0 0 40px rgba(192,156,240,0.3));}}
+@keyframes svgSpecialGlow{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(192,156,240,0.8)) drop-shadow(0 0 12px rgba(192,156,240,0.4));}
+  50%{filter:drop-shadow(0 0 14px rgba(192,156,240,1)) drop-shadow(0 0 28px rgba(192,156,240,0.6)) drop-shadow(0 0 50px rgba(245,200,66,0.25));}}
+.mem-star{position:fixed;z-index:88;width:44px;height:44px;display:flex;
+  align-items:center;justify-content:center;opacity:0;
+  cursor:pointer;
+  transition:opacity 0.3s ease,transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;}
+.mem-star svg{display:block;transition:transform 0.32s cubic-bezier(0.34,1.56,0.64,1);}
+.mem-star:hover svg{transform:scale(1.42);}
+.mem-star.show{opacity:1;pointer-events:all;animation:starTwinkleIn 0.72s cubic-bezier(0.34,1.3,0.64,1) both;}
+.mem-star.locked{pointer-events:none!important;opacity:0.38!important;}
+.mem-star .star-svg{animation:svgStarGlow 2.8s ease-in-out infinite;}
+.mem-star.special-star .star-svg{animation:svgSpecialGlow 2.6s ease-in-out infinite;}
+.star-inner-spin{transform-origin:22px 22px;animation:svgStarSpin 14s linear infinite;}
+.star-corona{transform-origin:22px 22px;animation:svgCorona 3s ease-in-out infinite;}
+
+/* ── TYFE — bright glowing font ── */
+@keyframes tyfePulse{
+  0%,100%{text-shadow:0 0 14px rgba(245,200,66,1),0 0 32px rgba(245,200,66,0.85),0 0 65px rgba(245,200,66,0.55),0 0 120px rgba(245,200,66,0.28),0 0 200px rgba(192,156,240,0.18);}
+  40%{text-shadow:0 0 22px rgba(245,200,66,1),0 0 55px rgba(245,200,66,0.95),0 0 100px rgba(245,200,66,0.7),0 0 180px rgba(245,200,66,0.38),0 0 280px rgba(192,156,240,0.28);}
+  55%{text-shadow:0 0 16px rgba(245,200,66,1),0 0 38px rgba(245,200,66,0.88),0 0 72px rgba(245,200,66,0.6),0 0 130px rgba(245,200,66,0.3),0 0 210px rgba(192,156,240,0.2);}}
+#tyfeWrap{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;
+  opacity:0;transition:opacity 1.8s cubic-bezier(0.22,0.9,0.36,1);}
+#tyfeWrap.on{opacity:1;}
+#tyfeMain{font-family:'Dancing Script',cursive;
+  font-size:clamp(2.2rem,7.5vw,5.4rem);color:#fff;font-weight:700;
+  text-align:center;letter-spacing:0.06em;line-height:1.2;
+  text-shadow:
+    0 0 14px rgba(245,200,66,1),
+    0 0 32px rgba(245,200,66,0.85),
+    0 0 65px rgba(245,200,66,0.55),
+    0 0 120px rgba(245,200,66,0.28),
+    0 0 200px rgba(192,156,240,0.18);
+  opacity:0;transform:scale(0.84) translateY(22px);
+  transition:opacity 1.6s cubic-bezier(0.22,0.9,0.36,1),transform 1.6s cubic-bezier(0.22,0.9,0.36,1);}
+#tyfeMain.on{opacity:1;transform:scale(1) translateY(0);animation:tyfePulse 2.8s ease-in-out infinite;}
+
+/* ── photo frames ── */
+.photo-frame{position:fixed;z-index:60;border-radius:50%;overflow:hidden;
+  border:2px solid rgba(245,200,66,0.35);
+  box-shadow:0 0 18px rgba(245,200,66,0.18);opacity:0;
+  transition:opacity 1.2s ease,box-shadow 0.5s ease,transform 0.5s ease;
+  pointer-events:none;}
+.photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
+.photo-frame.glow{box-shadow:0 0 28px rgba(245,200,66,0.7),0 0 60px rgba(245,200,66,0.35);}
+
+/* ── slice pieces ── */
+.slice-piece{position:fixed;z-index:62;cursor:pointer;opacity:0;
+  transition:opacity 0.9s ease,filter 0.3s ease;
+  filter:drop-shadow(0 4px 18px rgba(245,200,66,0.3));pointer-events:none;}
+.slice-piece.show{opacity:1;pointer-events:all;}
+.slice-inner{width:80px;height:62px;position:relative;
+  background:linear-gradient(180deg,#fff4f8 0%,#ffe8f0 55%,#e0c4a0 100%);
+  border-radius:5px 5px 3px 3px;
+  box-shadow:0 6px 22px rgba(40,10,80,0.5),inset 0 1px 0 rgba(255,255,255,0.55);}
+.slice-frosting{position:absolute;top:0;left:0;right:0;height:14px;
+  background:linear-gradient(180deg,#ffe0f0,#ffcce0);border-radius:5px 5px 0 0;}
+.slice-label{margin-top:10px;font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:0.8rem;letter-spacing:0.18em;color:rgba(255,255,255,0.38);
+  text-align:center;transition:color 0.3s ease;}
+
+/* ── letter ── */
+#letterWrap{max-width:580px;width:100%;text-align:center;padding:0 1rem;}
+.letter-para{font-family:'Crimson Pro',serif;font-style:italic;font-weight:300;
+  font-size:clamp(1rem,2.4vw,1.32rem);line-height:2.05;color:rgba(255,255,255,0.82);
+  white-space:pre-line;margin-bottom:1.4rem;opacity:0;
+  transform:translateY(18px);
+  transition:opacity 1.4s cubic-bezier(0.22,0.9,0.36,1),transform 1.4s cubic-bezier(0.22,0.9,0.36,1);}
+.letter-para.on{opacity:1;transform:translateY(0);}
+.letter-sign{font-family:'Dancing Script',cursive;font-size:clamp(1.3rem,3.5vw,2rem);
+  color:var(--gold);text-shadow:0 0 25px rgba(245,200,66,0.45);opacity:0;
+  transform:translateY(12px) scale(0.9);
+  transition:opacity 1.2s cubic-bezier(0.22,0.9,0.36,1),transform 1.2s cubic-bezier(0.22,0.9,0.36,1);
+  display:block;margin-top:0.4rem;}
+.letter-sign.on{opacity:1;transform:translateY(0) scale(1);}
+
+/* ── birthday wish scene ── */
+@keyframes wishBreathe{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.016);}}
+#birthdayWishScene{position:fixed;inset:0;z-index:432;
+  display:flex;align-items:center;justify-content:center;
+  background:#02000a;opacity:0;pointer-events:none;
+  transition:opacity 2.2s cubic-bezier(0.22,0.9,0.36,1);}
+#birthdayWishScene.on{opacity:1;}
+#birthdayWishText{font-family:'Dancing Script',cursive;
+  font-size:clamp(1.9rem,5.5vw,4.4rem);color:var(--gold);
+  text-align:center;max-width:820px;padding:2rem;
+  text-shadow:
+    0 0 20px rgba(245,200,66,0.95),
+    0 0 50px rgba(245,200,66,0.6),
+    0 0 100px rgba(245,200,66,0.3),
+    0 0 160px rgba(192,156,240,0.2);
+  letter-spacing:0.06em;opacity:0;transform:translateY(22px) scale(0.9);
+  transition:opacity 1.8s cubic-bezier(0.22,0.9,0.36,1),transform 1.8s cubic-bezier(0.22,0.9,0.36,1);}
+#birthdayWishText.on{opacity:1;transform:translateY(0) scale(1);animation:wishBreathe 5s ease-in-out infinite;}
+
+/* ── ending ── */
+#endingOverlay{position:fixed;inset:0;z-index:430;background:#02000a;opacity:0;
+  pointer-events:none;transition:opacity 2.2s ease;}
+#endingOverlay.on{opacity:1;pointer-events:all;}
+#restartBtn{position:fixed;z-index:445;top:58%;left:50%;
+  transform:translate(-50%,-50%) scale(0.88);font-family:'Crimson Pro',serif;
+  font-style:italic;font-size:1rem;letter-spacing:0.3em;color:rgba(255,255,255,0.3);
+  background:transparent;border:1px solid rgba(255,255,255,0.1);
+  padding:0.7rem 2.4rem;border-radius:100px;cursor:pointer;opacity:0;
+  pointer-events:none;
+  transition:opacity 0.9s ease,transform 0.9s ease,border-color 0.3s,color 0.3s;}
+#restartBtn.on{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
+/* ── vignette (permanent depth layer) ── */
+#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 38%,rgba(2,0,10,0.55) 75%,rgba(2,0,10,0.88) 100%);}
+
+/* ══════════════════════════════════════
+   UNIVERSAL FLOAT + HOVER GLOW SYSTEM
+══════════════════════════════════════ */
+@keyframes floatA{0%,100%{transform:translateY(0px);}50%{transform:translateY(-5px);}}
+@keyframes floatB{0%,100%{transform:translateY(0px);}50%{transform:translateY(-7px);}}
+@keyframes floatC{0%,100%{transform:translateY(-2px);}50%{transform:translateY(-9px);}}
+@keyframes floatStar{
+  0%,100%{transform:translateY(0px) scale(1) rotate(0deg);}
+  30%{transform:translateY(-6px) scale(1.04) rotate(4deg);}
+  70%{transform:translateY(-4px) scale(0.97) rotate(-3deg);}}
+
+/* Typewriter lines — subtle float once visible */
+.tw-line.on{animation:floatA 4.8s ease-in-out infinite;}
+.tw-line.on:nth-child(2){animation-duration:5.3s;animation-delay:0.4s;}
+.tw-line.on:nth-child(3){animation-duration:4.4s;animation-delay:0.8s;}
+.tw-line.on:nth-child(4){animation-duration:5.6s;animation-delay:0.2s;}
+.tw-line.on:nth-child(5){animation-duration:4.9s;animation-delay:0.6s;}
+.tw-line.on:nth-child(6){animation-duration:5.1s;animation-delay:1s;}
+
+/* Counter */
+.counter-block.show{animation:floatB 5.2s ease-in-out infinite 0.5s;}
+.counter-value{animation:floatA 4.6s ease-in-out infinite;}
+
+/* Buttons float + hover glow */
+.btn-soft.show{opacity:1;transform:translateY(0) scale(1);
+  animation:floatA 4.4s ease-in-out infinite 0.6s;}
+.btn-soft.show:hover{
+  transform:translateY(-3px) scale(1.03)!important;
+  animation:none;
+  box-shadow:0 0 28px rgba(245,200,66,0.22),0 0 55px rgba(245,200,66,0.1),
+             0 0 90px rgba(192,156,240,0.08);}
+
+/* Wish title */
+.wish-title.on{animation:floatB 5s ease-in-out infinite;}
+.wish-title.on:hover{text-shadow:0 0 55px rgba(245,200,66,0.55),0 0 100px rgba(245,200,66,0.25);}
+
+/* Wish orb hover glow */
+.wish-orb:hover{transform:scale(1.14);
+  box-shadow:0 0 50px rgba(245,200,66,0.5),0 0 100px rgba(245,200,66,0.22),
+             0 0 150px rgba(192,156,240,0.15);}
+
+/* Whisper line */
+#whisperLine.on{animation:floatA 4.2s ease-in-out infinite;}
+
+/* Letter paragraphs float + hover */
+.letter-para.on{animation:floatA 5.5s ease-in-out infinite;}
+.letter-para.on:nth-child(2){animation-duration:6s;animation-delay:0.3s;}
+.letter-para.on:nth-child(3){animation-duration:5.2s;animation-delay:0.6s;}
+.letter-para.on:nth-child(4){animation-duration:6.4s;animation-delay:0.9s;}
+.letter-para.on:hover{
+  color:rgba(255,255,255,0.96);
+  text-shadow:0 0 40px rgba(192,156,240,0.18),0 0 80px rgba(245,200,66,0.08);}
+
+/* Letter sign */
+.letter-sign.on{animation:floatC 4s ease-in-out infinite 1s;}
+
+/* Photo frames float */
+.photo-frame{animation:floatB 5.8s ease-in-out infinite;}
+.photo-frame:hover{
+  box-shadow:0 0 32px rgba(245,200,66,0.55),0 0 65px rgba(245,200,66,0.25),
+             0 0 110px rgba(192,156,240,0.15)!important;
+  transform:scale(1.05);}
+
+/* Slice pieces float + hover */
+.slice-piece.show:not([data-opened]){animation:floatA 4.5s ease-in-out infinite;}
+.slice-piece:hover .slice-inner{
+  box-shadow:0 8px 32px rgba(40,10,80,0.6),0 0 30px rgba(245,200,66,0.22),
+             inset 0 1px 0 rgba(255,255,255,0.7);}
+
+/* Hint text */
+#p2hint{animation:floatA 5s ease-in-out infinite;}
+.p2-note.show{animation:floatA 4.8s ease-in-out infinite 0.4s;}
+
+/* TYFE text — float too (heartbeat pulse already on it, stack carefully) */
+#tyfeMain.on{animation:tyfePulse 2.8s ease-in-out infinite, floatB 5.5s ease-in-out infinite 0.5s;}
+
+/* Memory stars — float constantly */
+.mem-star.show{animation:starTwinkleIn 0.72s cubic-bezier(0.34,1.3,0.64,1) both,
+               floatStar 4s ease-in-out infinite 0.8s;}
+.mem-star.show:hover{animation:none;transform:scale(1.45) translateY(-4px);}
+
+/* p2hint, counter labels hover glow */
+.counter-label:hover{color:rgba(255,255,255,0.7);}
+.counter-time{animation:floatA 4.6s ease-in-out infinite 0.3s;}
+.counter-time:hover{text-shadow:0 0 30px rgba(245,200,66,0.55);}
+
+/* WishMade banner hover */
+#wishMadeBanner.on:hover{
+  text-shadow:0 0 80px rgba(245,200,66,0.9),0 0 150px rgba(245,200,66,0.4);}
+
+/* Restart button float */
+#restartBtn.on{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;
+  animation:floatA 4.5s ease-in-out infinite 0.5s;}
+#restartBtn.on:hover{transform:translate(-50%,-50%) scale(1.05) translateY(-3px)!important;
+  animation:none;
+  border-color:rgba(245,200,66,0.55);color:rgba(255,255,255,0.9);
+  box-shadow:0 0 28px rgba(245,200,66,0.2);}
+
+/* Birthday wish text hover */
+#birthdayWishText.on:hover{
+  text-shadow:0 0 30px rgba(245,200,66,1),0 0 65px rgba(245,200,66,0.75),
+              0 0 120px rgba(245,200,66,0.4),0 0 200px rgba(192,156,240,0.3);}
+
+/* ── wish orb enhanced ── */
+@keyframes wishPulse{
+  0%,100%{box-shadow:0 0 18px rgba(245,200,66,0.2),0 0 0 0 rgba(245,200,66,0.12);}
+  50%{box-shadow:0 0 44px rgba(245,200,66,0.42),0 0 70px rgba(192,156,240,0.2),0 0 0 8px rgba(245,200,66,0.04);}}
+
+/* ══════════════════════════════════════════════════
+   FINAL TOUCH ANIMATIONS
+══════════════════════════════════════════════════ */
+
+/* 1. Cursor ripple on click */
+.click-ripple{position:fixed;z-index:999;pointer-events:none;border-radius:50%;
+  border:1.5px solid rgba(245,200,66,0.55);
+  transform:scale(0);opacity:1;
+  animation:clickRipple 0.7s cubic-bezier(0.22,0.9,0.36,1) forwards;}
+@keyframes clickRipple{
+  0%{transform:scale(0);opacity:0.8;}
+  100%{transform:scale(1);opacity:0;}}
+
+/* 2. Ambient floating motes canvas */
+#motesCanvas{position:fixed;inset:0;z-index:2;pointer-events:none;
+  width:100%;height:100%;opacity:0.55;}
+
+/* 3. Slice piece — bounce-in entrance */
+@keyframes sliceBounceIn{
+  0%{opacity:0;transform:translateY(-28px) scale(0.7);}
+  65%{transform:translateY(4px) scale(1.06);}
+  82%{transform:translateY(-3px) scale(0.97);}
+  100%{opacity:1;transform:translateY(0) scale(1);}}
+.slice-piece.show{opacity:1;pointer-events:all;
+  animation:sliceBounceIn 0.65s cubic-bezier(0.34,1.3,0.64,1) both;}
+
+/* 4. Photo frame entrance */
+@keyframes photoPopIn{
+  0%{opacity:0;transform:scale(0.6);}
+  70%{transform:scale(1.08);}
+  100%{opacity:1;transform:scale(1);}}
+.photo-frame{position:fixed;z-index:60;border-radius:50%;overflow:hidden;
+  border:2px solid rgba(245,200,66,0.35);
+  box-shadow:0 0 18px rgba(245,200,66,0.18);opacity:0;
+  transition:opacity 0.6s ease, box-shadow 0.5s ease;}
+.photo-frame.show-anim{animation:photoPopIn 0.72s cubic-bezier(0.34,1.3,0.64,1) both;}
+.photo-frame.glow{box-shadow:0 0 28px rgba(245,200,66,0.7),0 0 60px rgba(245,200,66,0.35);}
+
+/* 5. Letter sign spinning ✦ */
+@keyframes signFloat{
+  0%,100%{transform:translateY(0) scale(1) rotate(0deg);}
+  30%{transform:translateY(-5px) scale(1.05) rotate(8deg);}
+  65%{transform:translateY(-3px) scale(1.02) rotate(-4deg);}}
+.letter-sign.on{opacity:1;transform:translateY(0) scale(1);
+  animation:signFloat 5s cubic-bezier(0.45,0.05,0.55,0.95) infinite 1.2s;}
+
+/* 6. WishMadeBanner secondary pulse after appear */
+@keyframes bannerPulse{
+  0%,100%{transform:translateX(-50%) scale(1);}
+  50%{transform:translateX(-50%) scale(1.04);}}
+#wishMadeBanner.on{opacity:1;transform:translateX(-50%) scale(1);
+  animation:bannerPulse 2s ease-in-out infinite 0.7s;}
+
+/* 7. Wish orb ring slow continuous spin */
+.orb-ring{position:absolute;width:112px;height:112px;border-radius:50%;
+  border:1px solid rgba(245,200,66,0.12);
+  animation:orbRingPulse 2.4s ease-in-out infinite, orbSpin 12s linear infinite;}
+@keyframes orbSpin{from{transform:rotate(0deg) scale(1);}to{transform:rotate(360deg) scale(1);}}
+
+/* 8. Knife wiggle when grabbed */
+@keyframes knifeWiggle{
+  0%,100%{transform:rotate(0deg);}
+  20%{transform:rotate(-4deg);}
+  40%{transform:rotate(3deg);}
+  60%{transform:rotate(-2deg);}
+  80%{transform:rotate(1deg);}}
+#knifeWrap.lit{filter:drop-shadow(0 6px 22px rgba(245,200,66,0.5));
+  animation:knifeWiggle 0.38s ease-in-out;}
+
+/* 9. Screen-edge shimmer wave on phase change */
+@keyframes phaseRipple{
+  0%{opacity:0.18;transform:scale(0.88);}
+  60%{opacity:0.06;}
+  100%{opacity:0;transform:scale(1.05);}}
+.phase-ripple{position:fixed;inset:0;z-index:19;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 60%,rgba(192,156,240,0.14) 0%,transparent 70%);
+  animation:phaseRipple 1.1s cubic-bezier(0.22,0.9,0.36,1) forwards;}
+
+/* 10. Cat ground shadow pulse */
+@keyframes shadowPulse{
+  0%,100%{rx:21;opacity:0.22;}
+  50%{rx:24;opacity:0.14;}}
+#cat-shadow{animation:shadowPulse 3.6s ease-in-out infinite;}
+
+/* 11. Counter time tick flash */
+@keyframes timeTick{
+  0%{opacity:0.55;transform:scale(1);}
+  10%{opacity:0.88;transform:scale(1.04);}
+  100%{opacity:0.55;transform:scale(1);}}
+.counter-time.tick{animation:timeTick 0.22s ease-out;}
+
+/* 12. Falling star glint */
+@keyframes starGlint{
+  0%,100%{filter:drop-shadow(0 0 10px rgba(245,200,66,0.7)) brightness(1);}
+  50%{filter:drop-shadow(0 0 20px rgba(245,200,66,1)) brightness(1.25);}}
+
+/* 13. Star game ring full — spinning arc */
+@keyframes ringFullSpin{from{stroke-dashoffset:0;}to{stroke-dashoffset:-477.52;}}
+
+/* 14. Page load fade-in */
+@keyframes bodyReveal{
+  from{opacity:0;}to{opacity:1;}}
+body{animation:bodyReveal 1.4s ease-out forwards;}
+
+/* 15. Scroll cue on letter */
+#scrollCue{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);
+  font-size:1.1rem;opacity:0;pointer-events:none;
+  animation:scrollCuePulse 2s ease-in-out infinite;color:rgba(255,255,255,0.22);}
+@keyframes scrollCuePulse{
+  0%,100%{opacity:0;transform:translateX(-50%) translateY(0);}
+  50%{opacity:0.45;transform:translateX(-50%) translateY(4px);}}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<canvas id="cakeCanvas"></canvas>
+<canvas id="sparkCanvas"></canvas>
+<canvas id="motesCanvas"></canvas>
+<div id="vignette"></div>
+
+<!-- PHASE 1 -->
+<div class="phase" id="phase1">
+  <div class="tw-wrap">
+    <span class="tw-line" id="l1-1"></span>
+    <span class="tw-line" id="l1-2"></span>
+    <span class="tw-line" id="l1-3"></span>
+    <span class="tw-line" id="l1-4"></span>
+    <span class="tw-line" id="l1-5"></span>
+    <span class="tw-line" id="l1-6"></span>
+  </div>
+  <button class="btn-soft" id="btn1" onclick="toPhase15()">👀</button>
+</div>
+
+<!-- PHASE 1.5 -->
+<div class="phase" id="phase15">
+  <div class="tw-wrap">
+    <span class="tw-line" id="l15-1"></span>
+    <span class="tw-line" id="l15-2"></span>
+    <span class="tw-line" id="l15-3"></span>
+  </div>
+  <div class="counter-block" id="counterBlock">
+    <div class="counter-label">The stars were counting..</div>
+    <div class="counter-value" id="counterVal">2010 · 03 · 14</div>
+    <div class="counter-time" id="counterTime"></div>
+  </div>
+  <button class="btn-soft" id="btn15" onclick="toPhase2()">Aniiii ?...</button>
+</div>
+
+<!-- PHASE 2 -->
+<div class="phase" id="phase2">
+  <div class="tw-wrap">
+    <span class="tw-line" id="l2-1"></span>
+    <span class="tw-line" id="l2-2"></span>
+    <span class="tw-line" id="l2-3"></span>
+    <span class="tw-line" id="l2-4"></span>
+  </div>
+  <div id="p2hint">Try to grab the knife.. 🔪</div>
+</div>
+
+<!-- PHASE 3 -->
+<div class="phase" id="phase3">
+  <button class="btn-soft" id="btn3" onclick="startCosmos()">Okaiiii...</button>
+</div>
+
+<!-- PHASE 5 -->
+<div class="phase" id="phase5">
+  <div class="tw-wrap">
+    <span class="tw-line" id="l5-1"></span>
+    <span class="tw-line" id="l5-2"></span>
+    <span class="tw-line" id="l5-3"></span>
+    <span class="tw-line" id="l5-4"></span>
+  </div>
+  <button class="btn-soft" id="blowBtn" onclick="blowCandle()">Blow the candle? :3</button>
+</div>
+
+<!-- COSMOS -->
+<div id="cosmosScene">
+  <div id="breathUI">
+    <div class="breath-ring" id="breathRing"><div class="breath-dot"></div></div>
+    <div class="breath-text" id="breathText">bBeathe in ✦</div>
+  </div>
+  <div id="revealUI">
+    <div class="tw-wrap">
+      <span class="tw-line" id="lr-1"></span>
+      <span class="tw-line" id="lr-2"></span>
+      <span class="tw-line" id="lr-3"></span>
+      <span class="tw-line" id="lr-4"></span>
+    </div>
+  </div>
+  <div id="wishUI">
+    <div class="wish-title" id="wishTitle">Make a wish, miss pretty ✨✨</div>
+    <div id="whisperLine"></div>
+    <div id="wishOrbWrap">
+      <div class="orb-ring"></div>
+      <button class="wish-orb" id="wishOrb" onclick="makeWish()">✦</button>
+    </div>
+  </div>
+</div>
+
+<div id="wishMadeBanner">Wishh delivered 🥳😌</div>
+
+<!-- TYFE (bright font, glowing) -->
+<div id="tyfeWrap"><div id="tyfeMain">Thank you for existing</div></div>
+
+<!-- PHASE 6 -->
+<div class="phase" id="phase6">
+  <button class="btn-soft" id="btn6" onclick="cutTheCake()">Cut it 💪</button>
+</div>
+
+<!-- PHASE 9 -->
+<div class="phase" id="phase9">
+  <div class="tw-wrap">
+    <span class="tw-line" id="l9-1"></span>
+    <span class="tw-line" id="l9-2"></span>
+    <span class="tw-line" id="l9-3"></span>
+  </div>
+</div>
+
+<!-- PHASE 10 -->
+<div class="phase" id="phase10">
+  <div id="letterWrap">
+    <p class="letter-para" id="lp1"></p>
+    <p class="letter-para" id="lp2"></p>
+    <p class="letter-para" id="lp3"></p>
+    <p class="letter-para" id="lp4"></p>
+    <span class="letter-sign" id="lsign">✦</span>
+  </div>
+  <div id="scrollCue">↓</div>
+  <button class="btn-soft" id="btn10" onclick="toPhase11()">anii... 👀</button>
+</div>
+
+<!-- BIRTHDAY WISH SCENE -->
+<div id="birthdayWishScene">
+  <div id="birthdayWishText">A very Happy Birthday To You Cosmica 🫶, ily</div>
+</div>
+
+<!-- ENDING -->
+<div id="endingOverlay"></div>
+<button id="restartBtn" onclick="location.reload()">Once more ?</button>
+
+<!-- ══ STAR CATCH GAME ══ -->
+<div id="starGameScene" style="position:fixed;inset:0;z-index:45;opacity:0;pointer-events:none;transition:opacity 1.2s ease;">
+
+  <!-- charge ring (SVG circle that fills as stars are caught) -->
+  <div id="sgRingWrap" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+    <svg width="180" height="180" style="transform:rotate(-90deg);">
+      <circle cx="90" cy="90" r="76" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="3.5"/>
+      <circle id="sgRingArc" cx="90" cy="90" r="76" fill="none" stroke="#f5c842" stroke-width="3.5"
+        stroke-linecap="round"
+        stroke-dasharray="477.52" stroke-dashoffset="477.52"
+        style="transition:stroke-dashoffset 0.45s cubic-bezier(0.22,0.9,0.36,1),stroke 0.4s ease;
+               filter:drop-shadow(0 0 9px rgba(245,200,66,0.65));"/>
+    </svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div id="sgCount" style="font-family:'Dancing Script',cursive;font-size:2.6rem;font-weight:700;color:#f5c842;
+        text-shadow:0 0 22px rgba(245,200,66,0.6);line-height:1;transition:transform 0.15s ease;">0</div>
+      <div style="font-family:'Crimson Pro',serif;font-style:italic;font-size:0.7rem;letter-spacing:0.45em;color:rgba(255,255,255,0.28);">/ 7</div>
+    </div>
+  </div>
+
+  <!-- hint -->
+  <div id="sgHint" style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);
+    font-family:'Crimson Pro',serif;font-style:italic;
+    font-size:clamp(0.82rem,2vw,1rem);letter-spacing:0.32em;
+    color:rgba(255,255,255,0.28);white-space:nowrap;
+    opacity:0;transition:opacity 1s ease;">catch the falling stars ✦</div>
+
+  <!-- win banner -->
+  <div id="sgWinText" style="position:absolute;top:38%;left:50%;
+    transform:translateX(-50%) scale(0.88);
+    font-family:'Dancing Script',cursive;font-size:clamp(2.4rem,8vw,5.2rem);
+    font-weight:700;color:#fff;white-space:nowrap;letter-spacing:0.06em;
+    text-shadow:
+      0 0 14px rgba(245,200,66,1),
+      0 0 32px rgba(245,200,66,0.88),
+      0 0 65px rgba(245,200,66,0.55),
+      0 0 120px rgba(245,200,66,0.28),
+      0 0 200px rgba(192,156,240,0.22);
+    opacity:0;pointer-events:none;
+    transition:opacity 1.3s ease,transform 1.3s cubic-bezier(0.22,0.9,0.36,1);">yayyy you winn :3</div>
+
+</div>
+
+<!-- KNIFE -->
+<div id="knifeWrap">
+  <svg viewBox="0 0 44 120" width="44" height="120">
+    <defs>
+      <linearGradient id="bladeG" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#c8d4e8"/>
+        <stop offset="38%" stop-color="#eef2ff"/>
+        <stop offset="100%" stop-color="#9aa8c0"/>
+      </linearGradient>
+      <linearGradient id="handleG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#a0784a"/>
+        <stop offset="100%" stop-color="#6a4c28"/>
+      </linearGradient>
+    </defs>
+    <path d="M20,2 L24,2 L22,0 Z" fill="url(#bladeG)"/>
+    <path d="M19,2 L25,2 L27,68 L17,68 Z" fill="url(#bladeG)"/>
+    <path d="M21,6 L22,6 L24,65 L23,65 Z" fill="rgba(255,255,255,0.38)"/>
+    <rect x="12" y="67" width="20" height="6" rx="3" fill="#b89060"/>
+    <rect x="13" y="68" width="18" height="3" rx="2" fill="rgba(255,255,255,0.18)"/>
+    <rect x="16" y="73" width="12" height="44" rx="5" fill="url(#handleG)"/>
+    <rect x="17" y="75" width="3" height="40" rx="2" fill="rgba(255,255,255,0.12)"/>
+    <rect x="16" y="86" width="12" height="2" rx="1" fill="rgba(0,0,0,0.22)"/>
+    <rect x="16" y="99" width="12" height="2" rx="1" fill="rgba(0,0,0,0.22)"/>
+  </svg>
+</div>
+
+<!-- CAT -->
+<div id="catWrap">
+  <div id="speechBubble"></div>
+  <svg id="catSvg" class="idle" viewBox="0 0 92 115" width="92" height="115">
+    <defs>
+      <!-- Head — radial light from top-left -->
+      <radialGradient id="hG" cx="32%" cy="26%" r="68%">
+        <stop offset="0%"   stop-color="#f2e8ff"/>
+        <stop offset="40%"  stop-color="#d8c2f8"/>
+        <stop offset="100%" stop-color="#9c78d8"/>
+      </radialGradient>
+      <!-- Head shadow overlay -->
+      <radialGradient id="hShad" cx="74%" cy="70%" r="52%">
+        <stop offset="0%"   stop-color="rgba(22,4,60,0.38)"/>
+        <stop offset="100%" stop-color="rgba(22,4,60,0)"/>
+      </radialGradient>
+      <!-- Body -->
+      <radialGradient id="bG" cx="36%" cy="24%" r="68%">
+        <stop offset="0%"   stop-color="#d4bef8"/>
+        <stop offset="55%"  stop-color="#b090e0"/>
+        <stop offset="100%" stop-color="#7c58b8"/>
+      </radialGradient>
+      <!-- Belly/chest -->
+      <radialGradient id="beG" cx="50%" cy="36%" r="62%">
+        <stop offset="0%"   stop-color="#eee6ff"/>
+        <stop offset="65%"  stop-color="#d8ccf4"/>
+        <stop offset="100%" stop-color="#bfaee4"/>
+      </radialGradient>
+      <!-- Ear gradient -->
+      <linearGradient id="earG" x1="10%" y1="95%" x2="90%" y2="5%">
+        <stop offset="0%"   stop-color="#9870cc"/>
+        <stop offset="100%" stop-color="#c8a8f0"/>
+      </linearGradient>
+      <!-- Inner ear -->
+      <radialGradient id="iEarG" cx="50%" cy="65%" r="58%">
+        <stop offset="0%"   stop-color="#ffb4d4"/>
+        <stop offset="100%" stop-color="#e070a8"/>
+      </radialGradient>
+      <!-- Iris -->
+      <radialGradient id="irisG" cx="38%" cy="32%" r="66%">
+        <stop offset="0%"   stop-color="#7848d8"/>
+        <stop offset="55%"  stop-color="#2c14a0"/>
+        <stop offset="100%" stop-color="#140830"/>
+      </radialGradient>
+      <!-- Tail -->
+      <linearGradient id="tailG" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#a888e0"/>
+        <stop offset="50%"  stop-color="#c4a8f8"/>
+        <stop offset="100%" stop-color="#a280d4"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Ground shadow -->
+    <ellipse id="cat-shadow" cx="46" cy="113" rx="21" ry="3.5" fill="rgba(0,0,0,0.22)"/>
+
+    <!-- Tail with inner highlight -->
+    <path id="cat-tail" d="M60,92 Q86,72 80,52" stroke="url(#tailG)" stroke-width="8.5" fill="none" stroke-linecap="round"/>
+    <path d="M62,90 Q85,73 80,55" stroke="rgba(220,205,255,0.38)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+    <!-- Body -->
+    <ellipse cx="46" cy="88" rx="24" ry="20" fill="url(#bG)"/>
+    <!-- Body shadow (right/bottom rim) -->
+    <ellipse cx="53" cy="94" rx="19" ry="14" fill="rgba(14,3,44,0.22)"/>
+    <!-- Body top-left highlight -->
+    <ellipse cx="36" cy="79" rx="10" ry="6.5" fill="rgba(245,235,255,0.24)" transform="rotate(-12 36 79)"/>
+
+    <!-- Belly/chest -->
+    <ellipse cx="46" cy="90" rx="14" ry="13" fill="url(#beG)"/>
+    <!-- Belly specular -->
+    <ellipse cx="43" cy="85" rx="5.5" ry="4.5" fill="rgba(255,255,255,0.2)" transform="rotate(-10 43 85)"/>
+
+    <!-- Neck shadow where head meets body -->
+    <ellipse cx="46" cy="72" rx="12" ry="4.5" fill="rgba(14,3,44,0.28)"/>
+
+    <!-- HEAD base -->
+    <circle cx="46" cy="47" r="28" fill="url(#hG)"/>
+    <!-- Head shadow overlay -->
+    <circle cx="46" cy="47" r="28" fill="url(#hShad)"/>
+    <!-- Forehead specular highlight -->
+    <ellipse cx="35" cy="31" rx="10" ry="7" fill="rgba(255,255,255,0.22)" transform="rotate(-22 35 31)"/>
+    <!-- Left rim light -->
+    <path d="M19,40 Q17.5,47 21,58" stroke="rgba(215,200,255,0.48)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    <!-- Subtle brow ridge shadow -->
+    <ellipse cx="36" cy="40" rx="7" ry="2.2" fill="rgba(14,3,44,0.14)" transform="rotate(-10 36 40)"/>
+    <ellipse cx="56" cy="40" rx="7" ry="2.2" fill="rgba(14,3,44,0.14)" transform="rotate(10 56 40)"/>
+
+    <!-- Ears outer -->
+    <polygon points="22,27 15,7 33,23" fill="url(#earG)"/>
+    <polygon points="70,27 77,7 59,23" fill="url(#earG)"/>
+    <!-- Ear back-shadow -->
+    <polygon points="22,27 17,9 25,21" fill="rgba(10,2,30,0.28)"/>
+    <polygon points="70,27 75,9 67,21" fill="rgba(10,2,30,0.28)"/>
+    <!-- Inner ears -->
+    <polygon points="23,25 18,11 30,21" fill="url(#iEarG)"/>
+    <polygon points="69,25 74,11 62,21" fill="url(#iEarG)"/>
+    <!-- Inner ear highlight -->
+    <polygon points="24,23 20,13 27,20" fill="rgba(255,210,230,0.48)"/>
+    <polygon points="68,23 72,13 65,20" fill="rgba(255,210,230,0.48)"/>
+
+    <!-- Cheek blush with highlight -->
+    <ellipse cx="24" cy="56" rx="7.5" ry="5.5" fill="rgba(244,120,168,0.3)"/>
+    <ellipse cx="68" cy="56" rx="7.5" ry="5.5" fill="rgba(244,120,168,0.3)"/>
+    <ellipse cx="22" cy="54" rx="3"   ry="2"   fill="rgba(255,210,228,0.22)"/>
+    <ellipse cx="70" cy="54" rx="3"   ry="2"   fill="rgba(255,210,228,0.22)"/>
+
+    <!-- Whiskers (three per side, opacity varied) -->
+    <line x1="6"  y1="49" x2="31" y2="51" stroke="rgba(255,255,255,0.58)" stroke-width="0.9"/>
+    <line x1="6"  y1="54" x2="31" y2="54" stroke="rgba(255,255,255,0.52)" stroke-width="0.9"/>
+    <line x1="7"  y1="59" x2="31" y2="57" stroke="rgba(255,255,255,0.46)" stroke-width="0.9"/>
+    <line x1="61" y1="51" x2="86" y2="49" stroke="rgba(255,255,255,0.58)" stroke-width="0.9"/>
+    <line x1="61" y1="54" x2="86" y2="54" stroke="rgba(255,255,255,0.52)" stroke-width="0.9"/>
+    <line x1="61" y1="57" x2="85" y2="59" stroke="rgba(255,255,255,0.46)" stroke-width="0.9"/>
+
+    <!-- Nose (triangular, shaded) -->
+    <path d="M43,55 Q46,52.8 49,55 L47.2,57.8 Q46,58.8 44.8,57.8 Z" fill="#d858a0"/>
+    <path d="M43.5,54.8 Q46,53 48.5,54.8" stroke="rgba(255,180,220,0.75)" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+    <!-- Philtrum line -->
+    <line x1="46" y1="57.5" x2="46" y2="60" stroke="rgba(16,4,40,0.45)" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- ── EYE GROUPS ── -->
+    <g class="cat-e on" id="eye-happy">
+      <path d="M29,44 Q36,37 43,44" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M49,44 Q56,37 63,44" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <circle cx="34" cy="43" r="1.3" fill="rgba(255,255,255,0.7)"/>
+      <circle cx="54" cy="43" r="1.3" fill="rgba(255,255,255,0.7)"/>
+    </g>
+
+    <g class="cat-e" id="eye-open">
+      <!-- Sclera -->
+      <ellipse cx="36" cy="44" rx="6.5" ry="6"   fill="rgba(238,232,255,0.96)"/>
+      <ellipse cx="56" cy="44" rx="6.5" ry="6"   fill="rgba(238,232,255,0.96)"/>
+      <!-- Sclera bottom shadow -->
+      <ellipse cx="36" cy="47" rx="5"   ry="2.8" fill="rgba(170,145,215,0.22)"/>
+      <ellipse cx="56" cy="47" rx="5"   ry="2.8" fill="rgba(170,145,215,0.22)"/>
+      <!-- Iris -->
+      <circle cx="36" cy="44" r="4.8" fill="url(#irisG)"/>
+      <circle cx="56" cy="44" r="4.8" fill="url(#irisG)"/>
+      <!-- Iris rim -->
+      <circle cx="36" cy="44" r="4.8" fill="none" stroke="rgba(100,60,200,0.4)" stroke-width="0.7"/>
+      <circle cx="56" cy="44" r="4.8" fill="none" stroke="rgba(100,60,200,0.4)" stroke-width="0.7"/>
+      <!-- Pupil (slightly oval, vertical) -->
+      <ellipse cx="36" cy="44" rx="2.2" ry="2.8" fill="rgba(6,2,16,0.96)"/>
+      <ellipse cx="56" cy="44" rx="2.2" ry="2.8" fill="rgba(6,2,16,0.96)"/>
+      <!-- Main catchlight -->
+      <circle cx="33.8" cy="41.8" r="1.6" fill="rgba(255,255,255,0.94)"/>
+      <circle cx="53.8" cy="41.8" r="1.6" fill="rgba(255,255,255,0.94)"/>
+      <!-- Secondary catchlight -->
+      <circle cx="38"   cy="45.8" r="0.8" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="58"   cy="45.8" r="0.8" fill="rgba(255,255,255,0.5)"/>
+      <!-- Upper eyelid crease -->
+      <path d="M30,41.5 Q36,38.2 42,41.5" stroke="rgba(16,4,50,0.55)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M50,41.5 Q56,38.2 62,41.5" stroke="rgba(16,4,50,0.55)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <g class="cat-e" id="eye-smug">
+      <path d="M29,45 Q36,38.5 43,45" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <rect x="27" y="38" width="17" height="6.5" fill="url(#hG)" rx="1" opacity="0.94"/>
+      <path d="M49,45 Q56,38.5 63,45" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <rect x="47" y="38" width="17" height="6.5" fill="url(#hG)" rx="1" opacity="0.94"/>
+      <circle cx="34" cy="43" r="1"   fill="rgba(255,255,255,0.55)"/>
+      <circle cx="54" cy="43" r="1"   fill="rgba(255,255,255,0.55)"/>
+    </g>
+
+    <g class="cat-e" id="eye-sad">
+      <path d="M29,42 Q36,49 43,42" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M49,42 Q56,49 63,42" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <!-- Tears with glint -->
+      <ellipse cx="31"  cy="53"   rx="2.2" ry="3.5" fill="rgba(120,190,255,0.72)"/>
+      <ellipse cx="61"  cy="53"   rx="2.2" ry="3.5" fill="rgba(120,190,255,0.72)"/>
+      <ellipse cx="30.5" cy="51.5" rx="0.8" ry="1.3" fill="rgba(210,240,255,0.82)"/>
+      <ellipse cx="60.5" cy="51.5" rx="0.8" ry="1.3" fill="rgba(210,240,255,0.82)"/>
+    </g>
+
+    <g class="cat-e" id="eye-closed">
+      <path d="M28,45 Q36,53 44,45" stroke="var(--cat-dark)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M48,45 Q56,53 64,45" stroke="var(--cat-dark)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M29,46 Q36,53 43,46"  stroke="rgba(175,145,220,0.3)" stroke-width="1.5" fill="none"/>
+      <path d="M49,46 Q56,53 63,46"  stroke="rgba(175,145,220,0.3)" stroke-width="1.5" fill="none"/>
+    </g>
+
+    <g class="cat-e" id="eye-excited">
+      <ellipse cx="36" cy="44" rx="7.5" ry="7"   fill="rgba(238,232,255,0.96)"/>
+      <ellipse cx="56" cy="44" rx="7.5" ry="7"   fill="rgba(238,232,255,0.96)"/>
+      <circle cx="36" cy="44" r="6.2" fill="url(#irisG)"/>
+      <circle cx="56" cy="44" r="6.2" fill="url(#irisG)"/>
+      <ellipse cx="36" cy="44" rx="2.8" ry="3.5" fill="rgba(6,2,16,0.96)"/>
+      <ellipse cx="56" cy="44" rx="2.8" ry="3.5" fill="rgba(6,2,16,0.96)"/>
+      <circle cx="32.8" cy="41" r="2.2" fill="rgba(255,255,255,0.96)"/>
+      <circle cx="52.8" cy="41" r="2.2" fill="rgba(255,255,255,0.96)"/>
+      <circle cx="39"   cy="41.5" r="1"  fill="rgba(255,255,255,0.65)"/>
+      <circle cx="59"   cy="41.5" r="1"  fill="rgba(255,255,255,0.65)"/>
+    </g>
+
+    <g class="cat-e" id="eye-curious">
+      <!-- left: open -->
+      <ellipse cx="36" cy="44" rx="7" ry="6.5"  fill="rgba(238,232,255,0.96)"/>
+      <circle cx="36" cy="44" r="5.5" fill="url(#irisG)"/>
+      <ellipse cx="36" cy="44" rx="2.4" ry="3"  fill="rgba(6,2,16,0.96)"/>
+      <circle cx="33.8" cy="41.8" r="2"  fill="rgba(255,255,255,0.94)"/>
+      <circle cx="38"   cy="45.5" r="0.8" fill="rgba(255,255,255,0.5)"/>
+      <!-- right: half-squint -->
+      <path d="M49,45 Q56,38.5 63,45" stroke="var(--cat-dark)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <circle cx="54" cy="43" r="1.1" fill="rgba(255,255,255,0.55)"/>
+    </g>
+
+    <g class="cat-e" id="eye-dreamy">
+      <path d="M28,46 Q36,52 44,46" stroke="var(--cat-dark)" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+      <path d="M48,46 Q56,52 64,46" stroke="var(--cat-dark)" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+      <path d="M29,47 Q36,52.5 43,47" stroke="rgba(175,145,220,0.38)" stroke-width="1.2" fill="none"/>
+      <path d="M49,47 Q56,52.5 63,47" stroke="rgba(175,145,220,0.38)" stroke-width="1.2" fill="none"/>
+    </g>
+
+    <!-- ── MOUTH GROUPS ── -->
+    <g class="cat-e on" id="mouth-smile">
+      <path d="M39,60 Q46,66.5 53,60" stroke="var(--cat-dark)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </g>
+    <g class="cat-e" id="mouth-open">
+      <ellipse cx="46" cy="62.5" rx="5.5" ry="4.5" fill="rgba(14,3,40,0.92)"/>
+      <ellipse cx="46" cy="64"   rx="3.5" ry="2.8" fill="#c05570"/>
+      <ellipse cx="46" cy="65.5" rx="2.5" ry="1.5" fill="#d86880"/>
+    </g>
+    <g class="cat-e" id="mouth-smug">
+      <path d="M41,60.5 Q46,65 51,60.5" stroke="var(--cat-dark)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </g>
+    <g class="cat-e" id="mouth-sad">
+      <path d="M39,64.5 Q46,59.5 53,64.5" stroke="var(--cat-dark)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </g>
+    <g class="cat-e" id="mouth-o">
+      <ellipse cx="46" cy="62" rx="3.8" ry="3.8" stroke="var(--cat-dark)" stroke-width="1.8" fill="rgba(14,3,40,0.7)"/>
+    </g>
+  </svg>
+</div>
+
+<script>
+'use strict';
+const W=()=>window.innerWidth, H=()=>window.innerHeight;
+const $=id=>document.getElementById(id);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const easeOut3=t=>1-Math.pow(1-t,3);
+
+/* ════════════════════════════════════════════════════════════════
+   AUDIO
+════════════════════════════════════════════════════════════════ */
+function playAudio(src,vol=1){
+  try{const a=new Audio(src);a.volume=vol;a.play().catch(()=>{});return a;}
+  catch(e){return null;}
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CANVASES
+════════════════════════════════════════════════════════════════ */
+const bgCv=$('bgCanvas'),    bgCtx=bgCv.getContext('2d');
+const cakeCv=$('cakeCanvas'),cakeCtx=cakeCv.getContext('2d');
+const sparkCv=$('sparkCanvas'),sparkCtx=sparkCv.getContext('2d');
+const motesCv=$('motesCanvas'),motesCtx=motesCv.getContext('2d');
+
+function resize(){
+  bgCv.width=W();   bgCv.height=H();
+  cakeCv.width=W(); cakeCv.height=H();
+  sparkCv.width=W();sparkCv.height=H();
+  motesCv.width=W();motesCv.height=H();
+  motesCv.width=W();motesCv.height=H();
+}
+resize();
+window.addEventListener('resize',resize);
+
+/* ════════════════════════════════════════════════════════════════
+   STAR BACKGROUND
+════════════════════════════════════════════════════════════════ */
+const SCOLS=['#ffffff','#ffe8f0','#e0d0ff','#c8f2ff','#ffe0a0','#f0ffee'];
+const STARS=Array.from({length:200},()=>({
+  x:Math.random()*W(), y:Math.random()*H(),
+  r:Math.random()*1.5+0.15, a:Math.random(),
+  da:(Math.random()*0.009+0.002)*(Math.random()>.5?1:-1),
+  c:SCOLS[Math.floor(Math.random()*SCOLS.length)]
+}));
+const SHOOTERS=[];
+let cosmosMode=false;
+
+setInterval(()=>{
+  if(Math.random()>(cosmosMode?.85:.45))return;
+  SHOOTERS.push({x:Math.random()*W()*.82,y:Math.random()*H()*(cosmosMode?.55:.35),
+    vx:(Math.random()*7+4)*(Math.random()>.35?1:-1),vy:Math.random()*2.5+.6,
+    life:1,dec:cosmosMode?.014:.02,w:cosmosMode?2.2:1.6});
+},3200);
+setInterval(()=>{
+  if(!cosmosMode)return;
+  for(let i=0;i<2;i++)SHOOTERS.push({
+    x:Math.random()*W(),y:Math.random()*H()*.5,
+    vx:(Math.random()*9+5)*(Math.random()>.3?1:-1),vy:Math.random()*3+.8,
+    life:1,dec:.012,w:2});
+},800);
+
+(function bgLoop(){
+  bgCtx.clearRect(0,0,bgCv.width,bgCv.height);
+  /* nebula gradient — shifts to deep indigo in cosmos mode */
+  const nx=W()*.62, ny=H()*.22;
+  const ng=bgCtx.createRadialGradient(nx,ny,0,nx,ny,W()*(cosmosMode?.7:.4));
+  if(cosmosMode){
+    ng.addColorStop(0,'rgba(40,8,120,0.12)');
+    ng.addColorStop(0.5,'rgba(20,4,80,0.07)');
+    ng.addColorStop(1,'transparent');
+  } else {
+    ng.addColorStop(0,'rgba(80,30,160,0.04)');ng.addColorStop(1,'transparent');
+  }
+  bgCtx.fillStyle=ng;bgCtx.fillRect(0,0,bgCv.width,bgCv.height);
+  STARS.forEach(s=>{
+    /* cosmos: slow flutter + brightness boost */
+    const daScale=cosmosMode?0.3:1;
+    s.a+=s.da*daScale;
+    if(s.a>1){s.a=1;s.da*=-1;}if(s.a<.06){s.a=.06;s.da*=-1;}
+    const alpha=cosmosMode?Math.min(1,s.a*1.45):s.a;
+    const radius=cosmosMode?s.r*1.35:s.r;
+    bgCtx.beginPath();bgCtx.arc(s.x,s.y,radius,0,Math.PI*2);
+    bgCtx.fillStyle=s.c;bgCtx.globalAlpha=alpha;bgCtx.fill();
+  });
+  for(let i=SHOOTERS.length-1;i>=0;i--){
+    const s=SHOOTERS[i];s.x+=s.vx;s.y+=s.vy;s.life-=s.dec;
+    if(s.life<=0){SHOOTERS.splice(i,1);continue;}
+    /* longer trails in cosmos mode */
+    const trailLen=cosmosMode?11:7;
+    const g=bgCtx.createLinearGradient(s.x,s.y,s.x-s.vx*trailLen,s.y-s.vy*trailLen);
+    g.addColorStop(0,`rgba(255,255,255,${s.life})`);g.addColorStop(1,'rgba(255,255,255,0)');
+    bgCtx.beginPath();bgCtx.moveTo(s.x,s.y);bgCtx.lineTo(s.x-s.vx*trailLen,s.y-s.vy*trailLen);
+    bgCtx.strokeStyle=g;bgCtx.lineWidth=s.w||1.6;bgCtx.globalAlpha=s.life;bgCtx.stroke();
+  }
+  bgCtx.globalAlpha=1;requestAnimationFrame(bgLoop);
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   AMBIENT MOTES  (gentle always-present floating specks)
+════════════════════════════════════════════════════════════════ */
+const MOTE_COLS=['rgba(245,200,66,','rgba(192,156,240,','rgba(116,240,216,','rgba(255,255,255,'];
+const MOTES=Array.from({length:38},()=>({
+  x:Math.random()*W(), y:Math.random()*H(),
+  r:Math.random()*1.8+0.3,
+  vx:(Math.random()-.5)*0.18, vy:-(Math.random()*0.22+0.06),
+  a:Math.random()*0.45+0.08,
+  da:(Math.random()*0.003+0.001)*(Math.random()>.5?1:-1),
+  col:MOTE_COLS[Math.floor(Math.random()*MOTE_COLS.length)]
+}));
+(function motesLoop(){
+  motesCtx.clearRect(0,0,motesCv.width,motesCv.height);
+  MOTES.forEach(m=>{
+    m.x+=m.vx; m.y+=m.vy;
+    m.a+=m.da;
+    if(m.a>0.55){m.a=0.55;m.da*=-1;}
+    if(m.a<0.04){m.a=0.04;m.da*=-1;}
+    if(m.y<-10){m.y=H()+10;m.x=Math.random()*W();}
+    if(m.x<-10)m.x=W()+10;
+    if(m.x>W()+10)m.x=-10;
+    const rg=motesCtx.createRadialGradient(m.x,m.y,0,m.x,m.y,m.r*2.8);
+    rg.addColorStop(0,m.col+m.a+')');
+    rg.addColorStop(1,m.col+'0)');
+    motesCtx.beginPath();motesCtx.arc(m.x,m.y,m.r*2.8,0,Math.PI*2);
+    motesCtx.fillStyle=rg;motesCtx.fill();
+    motesCtx.beginPath();motesCtx.arc(m.x,m.y,m.r,0,Math.PI*2);
+    motesCtx.fillStyle=m.col+(m.a*1.6)+')';motesCtx.fill();
+  });
+  requestAnimationFrame(motesLoop);
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   CAKE DRAW
+════════════════════════════════════════════════════════════════ */
+let candleBlown=false, cakeVisible=false, cakeOpacity=0, flameT=0;
+const BOT_DRIPS=[{ox:.08,h:17},{ox:.20,h:11},{ox:.33,h:19},{ox:.46,h:9},{ox:.59,h:15},{ox:.72,h:13},{ox:.84,h:18},{ox:.93,h:10}];
+const TOP_DRIPS=[{ox:.10,h:13},{ox:.26,h:9},{ox:.44,h:16},{ox:.62,h:8},{ox:.80,h:14},{ox:.92,h:11}];
+const SPRINKLES=[{rx:-22,ry:20,sz:5.5,col:'#ffd080'},{rx:20,ry:28,sz:4.5,col:'#ff98c0'},{rx:-4,ry:40,sz:3.5,col:'#c0a0ff'},{rx:30,ry:16,sz:4,col:'#80e8f8'},{rx:-32,ry:34,sz:5,col:'#ff98c0'},{rx:8,ry:48,sz:3,col:'#a0ff98'}];
+
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+function drawStar5(ctx,x,y,r,col){
+  ctx.save();ctx.translate(x,y);ctx.fillStyle=col;ctx.beginPath();
+  for(let i=0;i<5;i++){const a1=(i*4*Math.PI)/5-Math.PI/2,a2=a1+(2*Math.PI)/10;
+    ctx.lineTo(Math.cos(a1)*r,Math.sin(a1)*r);ctx.lineTo(Math.cos(a2)*r*.42,Math.sin(a2)*r*.42);}
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function drawDrips(ctx,cx,topY,w,drips,col){
+  ctx.fillStyle=col;
+  drips.forEach(d=>{const x=cx-w/2+d.ox*w;
+    ctx.beginPath();ctx.arc(x,topY,5,Math.PI,0);
+    ctx.bezierCurveTo(x+5,topY+d.h*.55,x+4.5,topY+d.h,x,topY+d.h);
+    ctx.bezierCurveTo(x-4.5,topY+d.h,x-5,topY+d.h*.55,x-5,topY);
+    ctx.closePath();ctx.fill();});
+}
+function drawFlame(ctx,fx,fy){
+  flameT+=0.11;
+  const flick=Math.sin(flameT*3.8)*2+Math.sin(flameT*5.2)*1.4;
+  const fh=15+flick, fw=6+Math.sin(flameT*4.5)*1.5;
+  const glowG=ctx.createRadialGradient(fx,fy-6,0,fx,fy-6,28);
+  glowG.addColorStop(0,'rgba(255,200,50,0.28)');glowG.addColorStop(.5,'rgba(255,120,20,0.1)');glowG.addColorStop(1,'transparent');
+  ctx.fillStyle=glowG;ctx.beginPath();ctx.ellipse(fx,fy-6,24,24,0,0,Math.PI*2);ctx.fill();
+  ctx.save();ctx.beginPath();ctx.moveTo(fx,fy);
+  ctx.bezierCurveTo(fx-fw,fy-fh*.4,fx-fw*.8+flick*.5,fy-fh,fx,fy-fh-2);
+  ctx.bezierCurveTo(fx+fw*.8+flick*.3,fy-fh,fx+fw,fy-fh*.4,fx,fy);
+  const fg=ctx.createLinearGradient(fx,fy,fx,fy-fh-2);
+  fg.addColorStop(0,'rgba(255,110,15,0.95)');fg.addColorStop(.4,'rgba(255,188,38,0.9)');
+  fg.addColorStop(.8,'rgba(255,238,96,0.82)');fg.addColorStop(1,'rgba(255,255,200,0.5)');
+  ctx.fillStyle=fg;ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.moveTo(fx,fy-2);
+  ctx.bezierCurveTo(fx-fw*.4,fy-fh*.55,fx-fw*.3,fy-fh*.88,fx,fy-fh*.9);
+  ctx.bezierCurveTo(fx+fw*.3,fy-fh*.88,fx+fw*.4,fy-fh*.55,fx,fy-2);
+  const if2=ctx.createLinearGradient(fx,fy-2,fx,fy-fh);
+  if2.addColorStop(0,'rgba(255,200,50,0.9)');if2.addColorStop(1,'rgba(255,255,220,0.65)');
+  ctx.fillStyle=if2;ctx.fill();ctx.restore();
+}
+function drawCake(ctx,cx,cy){
+  ctx.save();
+  /* ── ambient bloom beneath cake ── */
+  const bloom=ctx.createRadialGradient(cx,cy+80,0,cx,cy+80,200);
+  bloom.addColorStop(0,'rgba(245,200,66,0.08)');
+  bloom.addColorStop(0.5,'rgba(192,156,240,0.04)');
+  bloom.addColorStop(1,'transparent');
+  ctx.fillStyle=bloom;ctx.fillRect(cx-220,cy-80,440,340);
+
+  /* ── candle flame warm light cast on cake ── */
+  if(!candleBlown){
+    const cndX=cx, cndY=cy-20-32;
+    const flameGlow=ctx.createRadialGradient(cndX,cndY-10,0,cndX,cndY-10,90);
+    flameGlow.addColorStop(0,`rgba(255,200,60,${0.13+Math.sin(flameT*3.1)*0.04})`);
+    flameGlow.addColorStop(0.5,'rgba(255,140,20,0.04)');
+    flameGlow.addColorStop(1,'transparent');
+    ctx.fillStyle=flameGlow;ctx.fillRect(cx-110,cy-80,220,200);
+  }
+
+  ctx.shadowColor='rgba(40,10,80,0.55)';ctx.shadowBlur=28;ctx.shadowOffsetX=7;ctx.shadowOffsetY=10;
+  const bw=162,bh=74,bx=cx-bw/2,by=cy+36;
+  rrect(ctx,bx,by,bw,bh,9);
+  const bg1=ctx.createLinearGradient(bx,by,bx+bw,by+bh);
+  bg1.addColorStop(0,'#fff6ea');bg1.addColorStop(.35,'#fff0e0');bg1.addColorStop(1,'#e0c4a0');
+  ctx.fillStyle=bg1;ctx.fill();
+  ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+  ctx.save();ctx.globalAlpha=.18;ctx.fillStyle='#4a2060';
+  rrect(ctx,bx+bw-10,by+5,10,bh-5,3);ctx.fill();ctx.restore();
+  ctx.beginPath();ctx.ellipse(cx,by,bw/2+4,12,0,0,Math.PI*2);ctx.fillStyle='#f8f0ff';ctx.fill();
+  drawDrips(ctx,cx,by,bw,BOT_DRIPS,'#f0e8ff');
+  for(let i=0;i<8;i++){const dx=bx+14+i*19;
+    ctx.beginPath();ctx.arc(dx,by+26,3.5,0,Math.PI*2);ctx.fillStyle=i%2===0?'#f8b0d0':'#c8b0f8';ctx.fill();
+    ctx.beginPath();ctx.arc(dx,by+54,3.5,0,Math.PI*2);ctx.fillStyle=i%2===0?'#c8b0f8':'#f8b0d0';ctx.fill();}
+  const tw=102,th=56,tx=cx-tw/2,ty=cy-20;
+  ctx.shadowColor='rgba(40,10,80,0.4)';ctx.shadowBlur=20;ctx.shadowOffsetX=5;ctx.shadowOffsetY=8;
+  rrect(ctx,tx,ty,tw,th,8);
+  const tg1=ctx.createLinearGradient(tx,ty,tx+tw,ty+th);
+  tg1.addColorStop(0,'#fff4f8');tg1.addColorStop(.35,'#ffe8f0');tg1.addColorStop(1,'#e0b8c8');
+  ctx.fillStyle=tg1;ctx.fill();
+  ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+  ctx.save();ctx.globalAlpha=.15;ctx.fillStyle='#4a2060';
+  rrect(ctx,tx+tw-8,ty+4,8,th-4,3);ctx.fill();ctx.restore();
+  ctx.beginPath();ctx.ellipse(cx,ty,tw/2+3,10,0,0,Math.PI*2);ctx.fillStyle='#fff4ff';ctx.fill();
+  drawDrips(ctx,cx,ty,tw,TOP_DRIPS,'#ffe8f8');
+
+  /* ── shimmer highlight drifting across frosting ── */
+  const shimX=tx + ((Date.now()*0.00018)%1)*tw;
+  const shimG=ctx.createLinearGradient(shimX-18,ty,shimX+18,ty);
+  shimG.addColorStop(0,'rgba(255,255,255,0)');shimG.addColorStop(0.5,'rgba(255,255,255,0.22)');shimG.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.save();ctx.beginPath();ctx.rect(tx,ty,tw,18);ctx.clip();
+  ctx.fillStyle=shimG;ctx.fillRect(shimX-22,ty,44,18);ctx.restore();
+
+  SPRINKLES.forEach(s=>drawStar5(ctx,cx+s.rx,ty+s.ry,s.sz,s.col));
+  const cndX=cx, cndY=ty-32;
+  if(!candleBlown){
+    ctx.shadowColor='rgba(255,220,80,0.35)';ctx.shadowBlur=12;
+    const cg=ctx.createLinearGradient(cndX-5,0,cndX+5,0);
+    cg.addColorStop(0,'#ffe060');cg.addColorStop(.5,'#fff6c0');cg.addColorStop(1,'#e8c030');
+    rrect(ctx,cndX-5,cndY,10,30,3);ctx.fillStyle=cg;ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#fff6c0';ctx.beginPath();ctx.ellipse(cndX+3,cndY+9,3,5,.35,0,Math.PI*2);ctx.fill();
+    ctx.save();ctx.strokeStyle='#2a1010';ctx.lineWidth=1.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cndX,cndY);ctx.lineTo(cndX+1,cndY-6);ctx.stroke();ctx.restore();
+    drawFlame(ctx,cndX+1,cndY-6);
+  } else {
+    ctx.shadowColor='rgba(255,220,80,0.12)';ctx.shadowBlur=6;
+    const cg=ctx.createLinearGradient(cndX-5,0,cndX+5,0);
+    cg.addColorStop(0,'#d8b840');cg.addColorStop(.5,'#e8d890');cg.addColorStop(1,'#c8a020');
+    rrect(ctx,cndX-5,cndY,10,30,3);ctx.fillStyle=cg;ctx.fill();ctx.shadowBlur=0;
+    ctx.save();ctx.strokeStyle='#1a0808';ctx.lineWidth=1.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cndX,cndY);ctx.lineTo(cndX+1,cndY-5);ctx.stroke();ctx.restore();
+    ctx.save();
+    for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(cndX+(i-1)*3,cndY-6);
+      ctx.bezierCurveTo(cndX+(i-1)*3-2,cndY-12,cndX+(i-1)*3+2,cndY-18,cndX+(i-1)*3,cndY-22);
+      ctx.strokeStyle=`rgba(200,200,200,${0.08-i*0.02})`;ctx.lineWidth=1.2;ctx.stroke();}
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+/* ── star→cake formation ── */
+const FCOLS=['#f5c842','#ffe8a0','#c084fc','#ff85a1','#64ffda','#ffffff'];
+let formParticles=[],formDone=false,formFadeIn=false;
+
+function buildFormTargets(cx,cy){
+  const pts=[];
+  const bw=162,bh=74,bx=cx-81,by=cy+36;
+  for(let i=0;i<=44;i++){const t=i/44;pts.push({x:bx+t*bw,y:by});pts.push({x:bx+t*bw,y:by+bh});}
+  for(let i=0;i<=22;i++){const t=i/22;pts.push({x:bx,y:by+t*bh});pts.push({x:bx+bw,y:by+t*bh});}
+  const tw=102,th=56,tx=cx-51,ty=cy-20;
+  for(let i=0;i<=28;i++){const t=i/28;pts.push({x:tx+t*tw,y:ty});pts.push({x:tx+t*tw,y:ty+th});}
+  for(let i=0;i<=16;i++){const t=i/16;pts.push({x:tx,y:ty+t*th});pts.push({x:tx+tw,y:ty+t*th});}
+  for(let i=0;i<10;i++)pts.push({x:cx+(-5+Math.random()*10),y:ty-10-Math.random()*36});
+  return pts;
+}
+function startFormation(){
+  return new Promise(resolve=>{
+    const cx=W()/2, cy=H()*0.33;
+    const targets=buildFormTargets(cx,cy);
+    formParticles=targets.slice(0,Math.min(targets.length,130)).map(t=>({
+      x:Math.random()*W(),y:Math.random()*H(),tx:t.x,ty:t.y,
+      r:Math.random()*2.2+0.7,col:FCOLS[Math.floor(Math.random()*FCOLS.length)],
+      prog:0,spd:.011+Math.random()*.016}));
+    formDone=false;cakeOpacity=0;formFadeIn=false;
+    (function loop(){
+      cakeCtx.clearRect(0,0,cakeCv.width,cakeCv.height);
+      if(!formDone){
+        let all=true;
+        formParticles.forEach(p=>{
+          p.prog=Math.min(1,p.prog+p.spd);if(p.prog<1)all=false;
+          const e=easeOut3(p.prog),px=p.x+(p.tx-p.x)*e,py=p.y+(p.ty-p.y)*e;
+          cakeCtx.beginPath();cakeCtx.arc(px,py,p.r,0,Math.PI*2);
+          cakeCtx.fillStyle=p.col;cakeCtx.globalAlpha=1-p.prog*.55;cakeCtx.fill();});
+        cakeCtx.globalAlpha=1;
+        if(all&&!formFadeIn){formFadeIn=true;setTimeout(()=>{formDone=true;},180);}
+      } else cakeOpacity=Math.min(1,cakeOpacity+.025);
+      if(cakeOpacity>0){cakeCtx.globalAlpha=cakeOpacity;drawCake(cakeCtx,W()/2,H()*0.33);cakeCtx.globalAlpha=1;}
+      if(cakeOpacity<1)requestAnimationFrame(loop);
+      else{cakeVisible=true;startCakeLoop();resolve();}
+    })();
+  });
+}
+function startCakeLoop(){
+  (function loop(){
+    cakeCtx.clearRect(0,0,cakeCv.width,cakeCv.height);
+    drawCake(cakeCtx,W()/2,H()*0.33);
+    if(cakeVisible)requestAnimationFrame(loop);
+  })();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CAT
+════════════════════════════════════════════════════════════════ */
+const catWrap=$('catWrap'),catSvg=$('catSvg'),speechEl=$('speechBubble');
+const CAT={x:W()+60,bottom:55,speechTimer:null};
+
+function catSetPos(x){CAT.x=x;catWrap.style.left=x+'px';catWrap.style.bottom=CAT.bottom+'px';}
+function catMoveTo(tx,onDone){
+  catSvg.style.transform=(tx<CAT.x)?'scaleX(-1)':'scaleX(1)';
+  catSvg.classList.remove('idle','talking');catSvg.classList.add('walking');
+  catWrap.style.transition='left 1.3s cubic-bezier(0.34,1.08,0.64,1)';catSetPos(tx);
+  setTimeout(()=>{catSvg.style.transform='scaleX(1)';
+    catSvg.classList.remove('walking');catSvg.classList.add('idle');if(onDone)onDone();},1350);
+}
+const EMO={
+  happy:  {eyes:'eye-happy',  mouth:'mouth-smile',anim:'idle'},
+  talking:{eyes:'eye-open',   mouth:'mouth-open', anim:'talking'},
+  smug:   {eyes:'eye-smug',   mouth:'mouth-smug', anim:'idle'},
+  sad:    {eyes:'eye-sad',    mouth:'mouth-sad',  anim:'idle'},
+  closed: {eyes:'eye-closed', mouth:'mouth-smile',anim:'idle'},
+  dreamy: {eyes:'eye-dreamy', mouth:'mouth-smile',anim:'idle'},
+  excited:{eyes:'eye-excited',mouth:'mouth-open', anim:'idle'},
+  curious:{eyes:'eye-curious',mouth:'mouth-o',    anim:'idle'},
+};
+const ALL_EYES  =[...new Set(Object.values(EMO).map(e=>e.eyes))];
+const ALL_MOUTHS=[...new Set(Object.values(EMO).map(e=>e.mouth))];
+
+function setCatEmo(name){
+  const cfg=EMO[name]||EMO.happy;
+  ALL_EYES.forEach(id=>{const e=$(id);if(e)e.classList.remove('on');});
+  ALL_MOUTHS.forEach(id=>{const e=$(id);if(e)e.classList.remove('on');});
+  $(cfg.eyes).classList.add('on');$(cfg.mouth).classList.add('on');
+  catSvg.classList.remove('idle','talking','walking');catSvg.classList.add(cfg.anim);
+}
+function catSay(text,emo,duration,onDone){
+  if(CAT.speechTimer)clearTimeout(CAT.speechTimer);
+  setCatEmo(emo||'talking');speechEl.innerHTML=text;speechEl.classList.add('on');
+  if(duration>0){CAT.speechTimer=setTimeout(()=>{speechEl.classList.remove('on');
+    setTimeout(()=>{setCatEmo('happy');if(onDone)onDone();},420);},duration);}
+  else if(onDone)onDone();
+}
+function catHideSpeech(){speechEl.classList.remove('on');}
+
+/* ════════════════════════════════════════════════════════════════
+   TYPEWRITER
+════════════════════════════════════════════════════════════════ */
+function typewrite(id,text,speed=55){
+  return new Promise(resolve=>{
+    const el=$(id);if(!el){resolve();return;}
+    el.classList.add('on');el.textContent='';let i=0;
+    const iv=setInterval(()=>{el.textContent+=text[i++];
+      if(i>=text.length){clearInterval(iv);resolve();}},speed);
+  });
+}
+function typewriteEl(el,text,speed=55){
+  return new Promise(resolve=>{
+    el.textContent='';let i=0;
+    const iv=setInterval(()=>{el.textContent+=text[i++];
+      if(i>=text.length){clearInterval(iv);resolve();}},speed);
+  });
+}
+function showBtn(id){const el=$(id);if(el)el.classList.add('show');}
+function showPhase(id){
+  document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+  const ph=$(id);if(ph)ph.classList.add('active');
+  /* phase ripple wave */
+  const rpl=document.createElement('div');rpl.className='phase-ripple';
+  document.body.appendChild(rpl);setTimeout(()=>rpl.remove(),1200);
+}
+
+/* ── click ripple anywhere ── */
+document.addEventListener('click',e=>{
+  const d=document.createElement('div');
+  const sz=60+Math.random()*30;
+  d.className='click-ripple';
+  d.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-sz/2}px;top:${e.clientY-sz/2}px;`;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),750);
+});
+
+/* ── scroll cue visibility on phase 10 ── */
+function showScrollCue(){
+  const c=$('scrollCue');if(c)c.style.opacity='1';
+}
+function hideScrollCue(){
+  const c=$('scrollCue');if(c)c.style.opacity='0';
+}
+$('phase10')&&$('phase10').addEventListener('scroll',()=>{
+  const p=$('phase10');
+  if(p.scrollTop>10)hideScrollCue();else showScrollCue();
+});
+/* fade a group of lines out smoothly, then collapse their space */
+async function fadeOutLines(...ids){
+  ids.forEach(id=>{const e=$(id);if(e)e.classList.remove('on');});
+  await wait(560); /* let opacity transition finish */
+  ids.forEach(id=>{const e=$(id);if(e){e.style.display='none';}});
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 1
+════════════════════════════════════════════════════════════════ */
+async function runPhase1(){
+  showPhase('phase1');await wait(600);catMoveTo(W()-140);await wait(500);
+  /* group A — lines 1-3 */
+  await typewrite('l1-1','Dekhooo 🫣',60);await wait(1000);
+  await typewrite('l1-2','Dekhooo woo aagayiii...',56);await wait(1600);
+  await typewrite('l1-3','Helooooooooooooo Cooosmiluuuuuu :3',50);await wait(1800);
+  await fadeOutLines('l1-1','l1-2','l1-3');
+  /* group B — lines 4-6 */
+  await typewrite('l1-4','Happiiesttestt Birthdayy tooo youuuuuuu 💖💖💕',46);await wait(1600);
+  await typewrite('l1-5','Somewhere in the universe today, the stars have aligned perfectly',42);await wait(2000);
+  await typewrite('l1-6','Just so perfect that the entire cosmos is enlightened making it your birthdayyyy 🥳🎉🎊',36);
+  await wait(2400);catSay('Ohh sooo there you areee !!\nhii hiii hiiiii 🌛','talking',3800);
+  await wait(4200);showBtn('btn1');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 1.5  —  real-time counter
+════════════════════════════════════════════════════════════════ */
+let liveTickInterval=null;
+
+async function toPhase15(){
+  $('btn1').style.pointerEvents='none';showPhase('phase15');await wait(350);
+  setCatEmo('curious');await wait(300);
+  await typewrite('l15-1','Cosmiiii, Did you know ? 😌',60);await wait(1400);
+  await typewrite('l15-2','This universe has been counting to this exact moment, just to welcome your perfectly timed existence.',38);await wait(2400);
+  await typewrite('l15-3','Because even infinity pauses for perfect timing as Pi itself marks this rare cosmic alignment !!!! Its just surreal maaamm :3',36);
+  await wait(2800);$('counterBlock').classList.add('show');await wait(500);
+  await rollCounterToReal();
+  await wait(900);catSay('What a coincidence 😌','smug',4500);await wait(4900);
+  showBtn('btn15');
+}
+
+async function rollCounterToReal(){
+  const now=new Date();
+  const tY=now.getFullYear(), tM=now.getMonth()+1, tD=now.getDate();
+  const el=$('counterVal');
+  const steps=tY-2010, stepMs=Math.round(1800/steps);
+  for(let y=2010;y<=tY;y++){
+    const mm=String(tM).padStart(2,'0'), dd=String(tD).padStart(2,'0');
+    el.textContent=`${y} · ${mm} · ${dd}`;
+    if(y===tY){el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),700);}
+    if(y<tY)await wait(stepMs);
+  }
+  /* live seconds tick */
+  function tick(){
+    const d=new Date();
+    const el=$('counterTime');
+    if(!el)return;
+    el.textContent=
+      `${String(d.getHours()).padStart(2,'0')} : ${String(d.getMinutes()).padStart(2,'0')} : ${String(d.getSeconds()).padStart(2,'0')}`;
+    el.classList.remove('tick');
+    void el.offsetWidth; /* reflow to restart animation */
+    el.classList.add('tick');
+  }
+  tick();liveTickInterval=setInterval(tick,1000);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 2  —  knife ragebait
+════════════════════════════════════════════════════════════════ */
+let knifeAttempts=0;
+const knifeEl=$('knifeWrap');
+let knifeX=0,knifeY=0,dragging=false,dragOX=0,dragOY=0,knifeActive=false;
+
+async function toPhase2(){
+  if(liveTickInterval){clearInterval(liveTickInterval);liveTickInterval=null;}
+  $('btn15').style.pointerEvents='none';showPhase('phase2');setCatEmo('excited');
+  await wait(400);
+  /* group A — lines 1-3 */
+  await typewrite('l2-1','Okay but wait wait wait..',56);await wait(1100);
+  await typewrite('l2-2','Hold on actually..',60);await wait(1000);
+  await typewrite('l2-3','Before you cut......',58);await wait(1100);
+  await fadeOutLines('l2-1','l2-2','l2-3');
+  /* group B — line 4 */
+  await typewrite('l2-4','Theres a small request just a tiny one 🥹',50);
+  await wait(1600);catSay('Alrightyy 😋 Cake time arrived\n(im gonna steal all 😼)','excited',2800);
+  bgCv.style.opacity='.55';await wait(600);await startFormation();bgCv.style.opacity='1';
+  await wait(500);$('p2hint').style.opacity='1';await wait(600);
+  catSay('Go on maaam, its your meowdayy :3','talking',3200);await wait(400);
+  placeKnife(W()*.15,H()*.48);
+  knifeEl.style.display='block';setTimeout(()=>knifeEl.style.opacity='1',40);
+  knifeActive=true;bindKnife();
+}
+
+function placeKnife(x,y){knifeX=x;knifeY=y;knifeEl.style.left=x+'px';knifeEl.style.top=y+'px';}
+function bindKnife(){
+  knifeEl.addEventListener('mousedown',onKD);
+  knifeEl.addEventListener('touchstart',onKT,{passive:false});
+  window.addEventListener('mousemove',onMM);window.addEventListener('mouseup',onMU);
+  window.addEventListener('touchmove',onTM,{passive:false});window.addEventListener('touchend',onTU);
+}
+function unbindKnife(){
+  knifeEl.removeEventListener('mousedown',onKD);knifeEl.removeEventListener('touchstart',onKT);
+  window.removeEventListener('mousemove',onMM);window.removeEventListener('mouseup',onMU);
+  window.removeEventListener('touchmove',onTM);window.removeEventListener('touchend',onTU);
+  knifeActive=false;
+}
+function onKD(e){e.preventDefault();dragging=true;dragOX=e.clientX-knifeX;dragOY=e.clientY-knifeY;knifeEl.classList.add('lit');}
+function onKT(e){e.preventDefault();const t=e.touches[0];dragging=true;dragOX=t.clientX-knifeX;dragOY=t.clientY-knifeY;}
+function onMU(){dragging=false;knifeEl.classList.remove('lit');}
+function onTU(){dragging=false;}
+function onMM(e){if(!dragging||!knifeActive)return;moveKnife(e.clientX,e.clientY);}
+function onTM(e){if(!dragging||!knifeActive)return;e.preventDefault();moveKnife(e.touches[0].clientX,e.touches[0].clientY);}
+function moveKnife(cx,cy){
+  knifeX=cx-dragOX;knifeY=cy-dragOY;
+  knifeEl.style.left=knifeX+'px';knifeEl.style.top=knifeY+'px';
+  checkProximity();
+}
+function checkProximity(){
+  if(knifeAttempts>=3)return;
+  const tipX=knifeX+22,tipY=knifeY+4;
+  if(Math.hypot(tipX-W()/2,tipY-H()*0.33)<68)triggerTeleport();
+}
+async function triggerTeleport(){
+  dragging=false;knifeEl.classList.remove('lit');knifeAttempts++;
+  const fl=document.createElement('div');fl.className='t-flash';
+  document.body.appendChild(fl);setTimeout(()=>fl.remove(),400);
+  if(knifeAttempts===1){
+    knifeEl.style.transition='none';placeKnife(W()*.80,H()*.42);
+    await wait(220);catSay('Uh-Ohh too fast, whoops :P','curious',2600);
+    await wait(700);
+    const note=document.createElement('div');note.className='p2-note';
+    note.textContent='The universe is so dramatic';
+    $('phase2').appendChild(note);setTimeout(()=>note.classList.add('show'),80);
+  } else if(knifeAttempts===2){
+    knifeEl.style.transition='none';placeKnife(W()*.06,H()*.52);
+    await wait(220);catSay('Hehe, i guess its ragebaiting loll','smug',3000);
+  } else if(knifeAttempts===3){
+    knifeEl.style.transition='none';placeKnife(W()*.46,H()*.04);
+    unbindKnife();knifeEl.style.pointerEvents='none';
+    await wait(250);catSay('Fine ig u won now 😭','sad',2600);
+    await wait(2900);catSay('You always do win against neill nii 😆','sad',3000);
+    await wait(3400);
+    knifeEl.style.transition='opacity 0.9s ease,top 1.2s ease';
+    knifeEl.style.opacity='0';knifeEl.style.top='-200px';
+    await wait(1100);startStarGame();
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STAR CATCH GAME  —  between phase 2 & phase 3
+════════════════════════════════════════════════════════════════ */
+const SG_TOTAL = 7;
+let sgCaught = 0, sgSpawnTimer = null, sgActive = false, sgFalling = [];
+const SG_EMOJIS = ['⭐','🌟','✦','✧','💫'];
+const SG_CAT_LINES = [
+  [2, 'ohhh nice catch !!!','excited'],
+  [4, 'Yesss keep goinggg 🌙','excited'],
+  [6, 'One more !!!! 🥹','excited'],
+];
+
+async function startStarGame(){
+  showPhase(null);
+  const scene = $('starGameScene');
+  scene.style.opacity = '0';
+  scene.style.pointerEvents = 'all';
+  /* fade in */
+  await wait(200);
+  scene.style.opacity = '1';
+  await wait(600);
+
+  /* cat intro */
+  catMoveTo(W() - 140); setCatEmo('excited');
+  catSay('okay okay...\nbut the cosmos needs stardust first ! 🌙', 'excited', 3600);
+  await wait(2000);
+  $('sgHint').style.opacity = '1';
+  await wait(2000);
+
+  sgCaught = 0; sgActive = true; sgFalling = [];
+  _sgUpdateRing();
+  _sgSpawnLoop();
+}
+
+function _sgSpawnLoop(){
+  if(!sgActive) return;
+  _sgSpawnStar();
+  const delay = 700 + Math.random() * 800;
+  sgSpawnTimer = setTimeout(_sgSpawnLoop, delay);
+}
+
+function _sgSpawnStar(){
+  if(!sgActive) return;
+  const el = document.createElement('div');
+  const emoji = SG_EMOJIS[Math.floor(Math.random() * SG_EMOJIS.length)];
+  const sz = 28 + Math.random() * 22;          /* 28–50 px */
+  const x  = 60 + Math.random() * (W() - 120);
+  const spd = 1.4 + Math.random() * 1.8;       /* px / frame */
+  const drift = (Math.random() - 0.5) * 0.4;   /* gentle horizontal float */
+
+  el.textContent = emoji;
+  el.style.cssText = `
+    position:fixed; z-index:46; font-size:${sz}px; line-height:1;
+    left:${x}px; top:-${sz + 20}px;
+    opacity:0; pointer-events:all; cursor:pointer;
+    transition:opacity 0.35s ease;
+    filter:drop-shadow(0 0 10px rgba(245,200,66,0.7)) drop-shadow(0 ${sz*0.6}px ${sz*0.5}px rgba(245,200,66,0.18));
+    user-select:none;`;
+
+  el.addEventListener('click', () => _sgCatchStar(el));
+  el.addEventListener('touchstart', e => { e.preventDefault(); _sgCatchStar(el); }, {passive:false});
+  document.body.appendChild(el);
+  sgFalling.push({el, y: -(sz+20), spd, drift, x, sz});
+
+  /* fade in */
+  requestAnimationFrame(() => el.style.opacity = '1');
+
+  /* animate fall */
+  (function fall(){
+    const idx = sgFalling.findIndex(s => s.el === el);
+    if(idx === -1) return;                       /* already caught */
+    const s = sgFalling[idx];
+    s.y  += s.spd;
+    s.x  += s.drift;
+    el.style.top  = s.y + 'px';
+    el.style.left = s.x + 'px';
+    if(s.y > H() + s.sz + 40){
+      /* missed — remove quietly */
+      el.remove();
+      sgFalling.splice(idx, 1);
+      return;
+    }
+    if(sgActive) requestAnimationFrame(fall);
+  })();
+}
+
+function _sgCatchStar(el){
+  if(!sgActive) return;
+  const idx = sgFalling.findIndex(s => s.el === el);
+  if(idx === -1) return;
+  const {x, y, sz} = sgFalling[idx];
+
+  /* remove from tracking + DOM */
+  sgFalling.splice(idx, 1);
+  el.style.pointerEvents = 'none';
+  el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+  el.style.opacity = '0';
+  el.style.transform = 'scale(1.8)';
+  setTimeout(() => el.remove(), 220);
+
+  /* burst on sparkCanvas */
+  _sgBurst(x + sz/2, y + sz/2);
+
+  sgCaught++;
+  _sgUpdateRing();
+
+  /* bounce the count number */
+  const cnt = $('sgCount');
+  cnt.style.transform = 'scale(1.35)';
+  setTimeout(() => cnt.style.transform = 'scale(1)', 220);
+
+  /* cat reactions */
+  const line = SG_CAT_LINES.find(l => l[0] === sgCaught);
+  if(line) catSay(line[1], line[2], 1800);
+
+  if(sgCaught >= SG_TOTAL) _sgWin();
+}
+
+function _sgUpdateRing(){
+  const arc = $('sgRingArc');
+  const cnt = $('sgCount');
+  const circ = 477.52;
+  const fill = (sgCaught / SG_TOTAL);
+  arc.style.strokeDashoffset = circ * (1 - fill);
+  /* colour shift: gold → aurora as it fills */
+  if(fill >= 1){
+    arc.style.stroke = '#74f0d8';
+    arc.style.filter = 'drop-shadow(0 0 14px rgba(116,240,216,0.9))';
+  } else if(fill >= 0.6){
+    arc.style.stroke = '#c09cf0';
+    arc.style.filter = 'drop-shadow(0 0 10px rgba(192,156,240,0.7))';
+  }
+  cnt.textContent = sgCaught;
+  /* full ring spin when complete */
+  if(fill >= 1){
+    const arcEl = $('sgRingArc');
+    arcEl.style.animation = 'ringFullSpin 3s linear infinite';
+    arcEl.style.transformOrigin = '90px 90px';
+    arcEl.style.transformBox = 'fill-box';
+  }
+}
+
+function _sgBurst(cx, cy){
+  const COLS = ['#f5c842','#ffe0a0','#c084fc','#ff8fb0','#74f0d8','#ffffff'];
+  const ps = Array.from({length:26}, () => ({
+    x:cx, y:cy,
+    vx:(Math.random()-.5)*13, vy:(Math.random()-.5)*13,
+    r:Math.random()*3.5+1.5,
+    col:COLS[Math.floor(Math.random()*COLS.length)],
+    life:1, dec:.032+Math.random()*.018
+  }));
+  /* ring ripple */
+  const ripple = {cx, cy, r:0, maxR:55, life:1};
+  (function loop(){
+    let alive = false;
+    ps.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.vy+=.07; p.life-=p.dec;
+      if(p.life<=0) return; alive=true;
+      /* core dot */
+      sparkCtx.beginPath(); sparkCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      sparkCtx.fillStyle=p.col; sparkCtx.globalAlpha=p.life; sparkCtx.fill();
+      /* glow halo */
+      const rg=sparkCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.8);
+      rg.addColorStop(0,`rgba(245,200,66,${p.life*0.22})`); rg.addColorStop(1,'transparent');
+      sparkCtx.beginPath(); sparkCtx.arc(p.x,p.y,p.r*2.8,0,Math.PI*2);
+      sparkCtx.fillStyle=rg; sparkCtx.globalAlpha=1; sparkCtx.fill();
+    });
+    /* expand ring ripple */
+    if(ripple.r < ripple.maxR){
+      ripple.r += 3.2; ripple.life = 1 - ripple.r/ripple.maxR;
+      sparkCtx.beginPath(); sparkCtx.arc(ripple.cx,ripple.cy,ripple.r,0,Math.PI*2);
+      sparkCtx.strokeStyle=`rgba(245,200,66,${ripple.life*0.7})`;
+      sparkCtx.lineWidth=2; sparkCtx.globalAlpha=1; sparkCtx.stroke();
+      alive=true;
+    }
+    sparkCtx.globalAlpha=1;
+    if(alive) requestAnimationFrame(loop);
+  })();
+}
+
+async function _sgWin(){
+  sgActive = false;
+  clearTimeout(sgSpawnTimer);
+
+  /* remove all still-falling stars */
+  sgFalling.forEach(s => { s.el.style.opacity='0'; setTimeout(()=>s.el.remove(),300); });
+  sgFalling = [];
+
+  catHideSpeech(); setCatEmo('excited');
+  catSay('YAYYYY !!! 🎉🥳🎊','excited', 99999);
+
+  /* ── MASSIVE birthday party burst ── */
+  _sgPartyBurst();
+
+  /* ── hyperdrive shooting stars ── */
+  for(let i=0; i<28; i++){
+    setTimeout(()=>{
+      for(let j=0;j<3;j++) SHOOTERS.push({
+        x: Math.random()*W(),
+        y: Math.random()*H()*.4,
+        vx:(Math.random()*16+9)*(Math.random()>.3?1:-1),
+        vy: Math.random()*5+1.2,
+        life:1, dec:.006, w:2.8
+      });
+    }, i*110);
+  }
+
+  await wait(3000);
+
+  /* ── glow win text ── */
+  const wt = $('sgWinText');
+  wt.style.opacity = '1';
+  wt.style.transform = 'translateX(-50%) scale(1)';
+  await wait(2400);
+
+  /* ── fade scene out → phase 3 ── */
+  catHideSpeech();
+  const scene = $('starGameScene');
+  scene.style.opacity = '0';
+  await wait(1300);
+  scene.style.pointerEvents = 'none';
+  sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+  toPhase3();
+}
+
+function _sgPartyBurst(){
+  const COLS=['#f5c842','#ffe0a0','#c084fc','#ff8fb0','#74f0d8','#ffffff','#aaffaa','#ffaaee','#ff6b6b','#6bffdb'];
+
+  /* ── circles ── */
+  const circles = Array.from({length:120}, () => ({
+    x: Math.random()*W(), y: Math.random()*H(),
+    vx:(Math.random()-.5)*20, vy:(Math.random()-.5)*20,
+    r: Math.random()*5+2,
+    col: COLS[Math.floor(Math.random()*COLS.length)],
+    life:1, dec:.007+Math.random()*.006, shape:'circle'
+  }));
+
+  /* ── confetti rectangles ── */
+  const rects = Array.from({length:90}, () => ({
+    x: Math.random()*W(), y: Math.random()*H(),
+    vx:(Math.random()-.5)*22, vy:(Math.random()-.5)*22,
+    w: 4+Math.random()*10, h: 2+Math.random()*5,
+    rot: Math.random()*Math.PI*2,
+    rotV:(Math.random()-.5)*0.25,
+    col: COLS[Math.floor(Math.random()*COLS.length)],
+    life:1, dec:.007+Math.random()*.007, shape:'rect'
+  }));
+
+  /* ── center explosion wave ── */
+  const center = Array.from({length:80}, () => ({
+    x:W()/2, y:H()/2,
+    vx:(Math.random()-.5)*28, vy:(Math.random()-.5)*28,
+    r:Math.random()*4+1.5,
+    col:COLS[Math.floor(Math.random()*COLS.length)],
+    life:1, dec:.009+Math.random()*.007, shape:'circle', delay: Math.floor(Math.random()*8)
+  }));
+
+  const all=[...circles,...rects,...center];
+
+  (function loop(){
+    let alive=false;
+    all.forEach(p=>{
+      if(p.delay>0){p.delay--;alive=true;return;}
+      p.x+=p.vx; p.y+=p.vy; p.vy+=.05; p.vx*=0.992; p.life-=p.dec;
+      if(p.life<=0) return; alive=true;
+
+      if(p.shape==='rect'){
+        p.rot+=p.rotV;
+        sparkCtx.save();
+        sparkCtx.translate(p.x,p.y); sparkCtx.rotate(p.rot);
+        sparkCtx.fillStyle=p.col; sparkCtx.globalAlpha=p.life;
+        sparkCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        sparkCtx.restore();
+      } else {
+        sparkCtx.beginPath(); sparkCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        sparkCtx.fillStyle=p.col; sparkCtx.globalAlpha=p.life; sparkCtx.fill();
+        const rg=sparkCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.6);
+        rg.addColorStop(0,`rgba(245,200,66,${p.life*0.16})`); rg.addColorStop(1,'transparent');
+        sparkCtx.beginPath(); sparkCtx.arc(p.x,p.y,p.r*2.6,0,Math.PI*2);
+        sparkCtx.fillStyle=rg; sparkCtx.globalAlpha=1; sparkCtx.fill();
+      }
+    });
+    sparkCtx.globalAlpha=1;
+    if(alive) requestAnimationFrame(loop);
+    else sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+  })();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 3
+════════════════════════════════════════════════════════════════ */
+async function toPhase3(){
+  showPhase('phase3');setCatEmo('dreamy');await wait(600);
+  catSay('Close your eyes for a bit ? 😊','dreamy',4200);
+  await wait(4400);showBtn('btn3');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COSMOS — 5 breath cycles then wish setup
+════════════════════════════════════════════════════════════════ */
+async function startCosmos(){
+  $('btn3').style.pointerEvents='none';
+  cakeCv.style.opacity='0.15';
+  bgCv.style.filter='brightness(1.5) saturate(1.3)';
+  cosmosMode=true;showPhase(null);
+  $('cosmosScene').classList.add('active');
+  catHideSpeech();setCatEmo('closed');await wait(600);
+  $('breathUI').style.opacity='1';await wait(400);
+  for(let c=0;c<2;c++){
+    $('breathText').textContent='breathe in  ✦';$('breathText').style.opacity='1';
+    $('breathRing').classList.add('expand');await wait(3400);
+    $('breathText').style.opacity='0.3';await wait(400);
+    $('breathText').textContent='✦  breathe out';$('breathText').style.opacity='1';
+    $('breathRing').classList.remove('expand');await wait(3400);
+    $('breathText').style.opacity='0.3';await wait(300);
+  }
+  $('breathUI').style.opacity='0';await wait(900);$('breathUI').classList.add('gone');
+  /* reveal text */
+  $('revealUI').classList.add('show');
+  catSay('You can open them now maam :3','dreamy',3400);await wait(800);
+  await typewrite('lr-1','You can open them now, Cosmii :3',52);await wait(1600);
+  await typewrite('lr-2','Before you make your wish for today here....',48);await wait(1800);
+  await typewrite('lr-3','Whatever you wish, I hope it finds you',50);await wait(1700);
+  await typewrite('lr-4','You deserve all the magic into your life to make it happen.',44);
+  await wait(2200);catSay('Okayy, wishy wishyy time !!!','excited',2800);
+  await wait(3000);
+  $('revealUI').style.opacity='0';await wait(700);$('revealUI').classList.remove('show');
+  await toPhase4();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 4  —  wishing
+════════════════════════════════════════════════════════════════ */
+async function toPhase4(){
+  $('wishUI').classList.add('show');await wait(200);
+  $('wishTitle').classList.add('on');await wait(700);
+  catSay('Just anything :3','dreamy',2400);await wait(2700);
+  catSay('Anything that the genuine you want :3','closed',3200);await wait(3600);
+  await runWhispers();
+}
+async function runWhispers(){
+  const el=$('whisperLine');
+  const lines=[
+    {text:'Think about anything you want the most...',p:1000},
+    {text:"Dont drop it :3",p:900},
+    {text:'I know you will get there',p:1000},
+    {text:'There it is',p:800},
+    {text:'There you gooo :3 💪',p:900},
+    {text:'Keep it like its already yours (its gonna be 😌)',p:1100},
+    {text:'Okayyy noww wee send it to the Cosmos',p:900},
+  ];
+  for(const l of lines){
+    el.classList.remove('on');await wait(340);
+    el.classList.add('on');await typewriteEl(el,l.text,68);await wait(l.p);
+  }
+  el.classList.remove('on');el.textContent='';await wait(1800);
+  el.classList.add('on');await typewriteEl(el,"okay. it's ready.",68);
+  await wait(600);$('wishOrbWrap').style.opacity='1';
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAKE WISH
+════════════════════════════════════════════════════════════════ */
+let wishMadeOnce=false;
+async function makeWish(){
+  if(wishMadeOnce)return;wishMadeOnce=true;
+  const orb=$('wishOrb');
+  orb.style.pointerEvents='none';orb.style.animation='none';
+  orb.style.transition='transform 0.5s ease,opacity 0.5s ease,box-shadow 0.5s ease';
+  orb.style.transform='scale(3.2)';orb.style.opacity='0';
+  orb.style.boxShadow='0 0 80px rgba(245,200,66,0.8),0 0 160px rgba(245,200,66,0.4)';
+  spawnWishParticles();
+  await wait(350);$('wishMadeBanner').classList.add('on');
+  catHideSpeech();await wait(600);
+  catSay('Yayyyy !!! 🥳🥳','excited',2400);await wait(2700);
+  catSay('The cosmos said\nit counted that one 🌙','happy',3400);await wait(3800);
+  $('wishMadeBanner').classList.remove('on');await wait(400);
+  /* post-wish cosmos text */
+  $('wishUI').style.opacity='0';await wait(600);$('wishUI').classList.remove('show');
+  /* reuse revealUI lines */
+  ['lr-1','lr-2','lr-3','lr-4'].forEach(id=>{const e=$(id);if(e){e.classList.remove('on');e.textContent='';}});
+  $('revealUI').classList.add('show');$('revealUI').style.opacity='1';await wait(300);
+  await typewrite('lr-1','Your wish was heard, fully ....',50);await wait(1600);
+  await typewrite('lr-2','The universe counted every word of it :3',46);await wait(1800);
+  await typewrite('lr-3',"(even the ones you didn't say out loud :3)",42);await wait(1900);
+  await typewrite('lr-4','Just so you know, you\'ll get there cosmii 💪💪',46);
+  await wait(2200);catSay('The quiet ones\nalways land softest 😌','dreamy',4000);await wait(4400);
+  $('revealUI').style.opacity='0';await wait(700);$('revealUI').classList.remove('show');
+  $('cosmosScene').classList.remove('active');
+  bgCv.style.filter='';cosmosMode=false;cakeCv.style.opacity='1';
+  await wait(1800);await toPhase5();
+}
+function spawnWishParticles(){
+  const cx=W()/2,cy=H()/2;
+  const COLS=['#f5c842','#ffe0a0','#c084fc','#ff8fb0','#74f0d8','#ffffff'];
+  const ps=Array.from({length:80},()=>({x:cx,y:cy,
+    vx:(Math.random()-.5)*17,vy:(Math.random()-.5)*17,
+    r:Math.random()*4.5+2,col:COLS[Math.floor(Math.random()*COLS.length)],
+    life:1,dec:.014+Math.random()*.010}));
+  (function loop(){sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);let alive=false;
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.vx*=0.994;p.life-=p.dec;
+      if(p.life<=0)return;alive=true;
+      sparkCtx.beginPath();sparkCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      sparkCtx.fillStyle=p.col;sparkCtx.globalAlpha=p.life;sparkCtx.fill();
+      const rg=sparkCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);
+      rg.addColorStop(0,`rgba(245,200,66,${p.life*0.2})`);rg.addColorStop(1,'transparent');
+      sparkCtx.beginPath();sparkCtx.arc(p.x,p.y,p.r*3,0,Math.PI*2);
+      sparkCtx.fillStyle=rg;sparkCtx.globalAlpha=1;sparkCtx.fill();});
+    sparkCtx.globalAlpha=1;if(alive)requestAnimationFrame(loop);
+    else sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);})();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 5
+════════════════════════════════════════════════════════════════ */
+async function toPhase5(){
+  showPhase('phase5');setCatEmo('happy');catMoveTo(W()-140);await wait(700);
+  /* group A — lines 1-3 */
+  await typewrite('l5-1','Now, after the flame goes...',56);await wait(1300);
+  await typewrite('l5-2','I want to tell you something...',52);await wait(1500);
+  await typewrite('l5-3','But the universe insisted me to hide them in the stars 😔😔',42);await wait(1900);
+  await fadeOutLines('l5-1','l5-2','l5-3');
+  /* group B — line 4 */
+  await typewrite('l5-4',"So, I'll let the stars take my words.",48);
+  await wait(1700);catSay("the stars are waiting\nfor you. 🌙",'dreamy',3600);await wait(3900);
+  showBtn('blowBtn');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOW THE CANDLE
+════════════════════════════════════════════════════════════════ */
+let memStarsUnlocked=0;
+async function blowCandle(){
+  $('blowBtn').style.pointerEvents='none';$('blowBtn').classList.remove('show');$('blowBtn').style.opacity='0';
+  candleBlown=true;await runCandleSparks();showMemStars();
+}
+async function runCandleSparks(){
+  sparkCv.width=W();sparkCv.height=H();
+  const tipX=W()/2, tipY=H()*0.33-20-32-6;
+  const COLS=['#f5c842','#ffe0a0','#ffcc60','#fff4a0','#ffffff','#c084fc'];
+  const ps=Array.from({length:85},()=>({
+    x:tipX+(Math.random()-.5)*6,y:tipY,
+    vx:(Math.random()-.5)*6.5,vy:-(Math.random()*5+2),
+    r:Math.random()*3+1.2,col:COLS[Math.floor(Math.random()*COLS.length)],
+    life:1,dec:.014+Math.random()*.016,grav:.06+Math.random()*.05}));
+  await new Promise(resolve=>{
+    (function loop(){sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);let alive=false;
+      ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.grav;p.vx*=.985;p.life-=p.dec;
+        if(p.life<=0)return;alive=true;
+        sparkCtx.beginPath();sparkCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        sparkCtx.fillStyle=p.col;sparkCtx.globalAlpha=p.life;sparkCtx.fill();
+        const gg=sparkCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2);
+        gg.addColorStop(0,`rgba(255,220,80,${p.life*.2})`);gg.addColorStop(1,'transparent');
+        sparkCtx.beginPath();sparkCtx.arc(p.x,p.y,p.r*2,0,Math.PI*2);
+        sparkCtx.fillStyle=gg;sparkCtx.globalAlpha=1;sparkCtx.fill();});
+      sparkCtx.globalAlpha=1;
+      if(alive)requestAnimationFrame(loop);
+      else{sparkCv.width=sparkCv.width;resolve();}})();
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TYFE  —  bright glowing font + ambient twinkle halo
+════════════════════════════════════════════════════════════════ */
+let tyfePLoop=false;
+async function revealTyfe(){
+  const wrap=$('tyfeWrap'), main=$('tyfeMain');
+  wrap.classList.add('on');await wait(200);main.classList.add('on');
+  tyfePLoop=true;_tyfeTwinkle();
+  await wait(4800);
+  tyfePLoop=false;main.classList.remove('on');await wait(600);
+  wrap.classList.remove('on');sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+}
+function _tyfeTwinkle(){
+  sparkCv.width=W();sparkCv.height=H();
+  const cx=W()/2, cy=H()*.40;
+  const textW=Math.min(W()*.82,680), textH=130;
+  const TCOLS=['#f5c842','#ffe8a0','#ffffff','#c084fc','#ff8fb0','#74f0d8'];
+  const particles=Array.from({length:110},()=>_mkTyfeP(cx,cy,textW,textH,TCOLS));
+  (function loop(){
+    if(!tyfePLoop)return;
+    sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+    const t=Date.now()*0.001;
+    particles.forEach((p,i)=>{
+      const orbit=p.orbitR*(0.5+Math.sin(t*p.orbitSpd+p.orbitPh)*0.5);
+      const ox=Math.cos(t*p.orbitSpd*0.7+p.orbitPh)*orbit;
+      const oy=Math.sin(t*p.orbitSpd+p.orbitPh)*orbit*0.45;
+      p.x+=p.vx;p.y+=p.vy;p.life-=p.dec;
+      if(p.life<=0){particles[i]=_mkTyfeP(cx,cy,textW,textH,TCOLS);return;}
+      const px=p.x+ox, py=p.y+oy;
+      const pulse=0.55+Math.sin(t*p.pf*1000+p.po)*0.45;
+      sparkCtx.beginPath();sparkCtx.arc(px,py,p.r*pulse,0,Math.PI*2);
+      sparkCtx.fillStyle=p.col;sparkCtx.globalAlpha=p.life*0.88;sparkCtx.fill();
+      const rg=sparkCtx.createRadialGradient(px,py,0,px,py,p.r*3.5);
+      rg.addColorStop(0,`rgba(245,200,66,${p.life*0.16})`);rg.addColorStop(1,'transparent');
+      sparkCtx.beginPath();sparkCtx.arc(px,py,p.r*3.5,0,Math.PI*2);
+      sparkCtx.fillStyle=rg;sparkCtx.globalAlpha=1;sparkCtx.fill();
+    });
+    sparkCtx.globalAlpha=1;requestAnimationFrame(loop);
+  })();
+}
+function _mkTyfeP(cx,cy,tw,th,COLS){
+  return{x:cx+(Math.random()-.5)*tw*1.18,y:cy+(Math.random()-.5)*th*1.6,
+    vx:(Math.random()-.5)*0.42,vy:-(Math.random()*0.42+0.08),
+    r:Math.random()*2.6+0.5,col:COLS[Math.floor(Math.random()*COLS.length)],
+    life:0.55+Math.random()*0.45,dec:0.003+Math.random()*0.003,
+    pf:0.002+Math.random()*0.003,po:Math.random()*Math.PI*2,
+    orbitR:3+Math.random()*8,orbitSpd:0.4+Math.random()*0.9,
+    orbitPh:Math.random()*Math.PI*2};
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MEMORY STARS
+════════════════════════════════════════════════════════════════ */
+const MSD=[
+  {xf:.13,yf:.13,d:350},{xf:.30,yf:.07,d:750},{xf:.52,yf:.12,d:1150},
+  {xf:.70,yf:.08,d:1550},{xf:.84,yf:.15,d:1950},{xf:.22,yf:.28,d:2350},
+  {xf:.65,yf:.26,d:3900,special:true},
+];
+/* helper — build an animated SVG star */
+function _makeSvgStar(special){
+  const col  = special ? '#c09cf0' : '#f5c842';
+  const col2 = special ? '#e8d0ff' : '#fff8d0';
+  const glow = special ? 'rgba(192,156,240,0.55)' : 'rgba(245,200,66,0.55)';
+  const id   = 'sg'+Math.random().toString(36).slice(2,7);
+  return `<svg class="star-svg" viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${id}g" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="${col2}" stop-opacity="1"/>
+      <stop offset="100%" stop-color="${col}" stop-opacity="0.85"/>
+    </radialGradient>
+    <radialGradient id="${id}cr" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${glow}" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="${glow}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- corona halo -->
+  <ellipse class="star-corona" cx="22" cy="22" rx="16" ry="16" fill="url(#${id}cr)"/>
+  <!-- outer slow-spin 8-ray sparkle -->
+  <g class="star-inner-spin">
+    <line x1="22" y1="5"  x2="22" y2="11" stroke="${col}" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="22" y1="33" x2="22" y2="39" stroke="${col}" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="5"  y1="22" x2="11" y2="22" stroke="${col}" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="33" y1="22" x2="39" y2="22" stroke="${col}" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="9"  y1="9"  x2="13.2" y2="13.2" stroke="${col}" stroke-width="1" stroke-linecap="round" opacity="0.38"/>
+    <line x1="30.8" y1="30.8" x2="35" y2="35" stroke="${col}" stroke-width="1" stroke-linecap="round" opacity="0.38"/>
+    <line x1="35" y1="9"  x2="30.8" y2="13.2" stroke="${col}" stroke-width="1" stroke-linecap="round" opacity="0.38"/>
+    <line x1="13.2" y1="30.8" x2="9" y2="35" stroke="${col}" stroke-width="1" stroke-linecap="round" opacity="0.38"/>
+  </g>
+  <!-- 5-point star body -->
+  <polygon points="22,8 24.9,17.1 34.5,17.1 26.8,22.7 29.7,31.8 22,26.2 14.3,31.8 17.2,22.7 9.5,17.1 19.1,17.1"
+    fill="url(#${id}g)"
+    stroke="${col}" stroke-width="0.7" stroke-linejoin="round"/>
+  <!-- inner highlight on star -->
+  <polygon points="22,11.5 23.8,17.1 29.8,17.1 25.0,20.5 26.8,26.1 22,22.7 17.2,26.1 19.0,20.5 14.2,17.1 20.2,17.1"
+    fill="${col2}" opacity="0.28"/>
+  <!-- centre bright dot -->
+  <circle cx="22" cy="20.5" r="2.2" fill="${col2}" opacity="0.82"/>
+</svg>`;
+}
+
+function showMemStars(){
+  catSay('Take your time, queen !!','curious',4000);
+  MSD.forEach((sd,idx)=>{
+    const div=document.createElement('div');
+    div.className='mem-star'+(sd.special?' special-star':'');
+    div.id='mstar-'+(idx+1);
+    div.innerHTML=_makeSvgStar(sd.special);
+    div.style.left=(sd.xf*W()-22)+'px';div.style.top=(sd.yf*H()-22)+'px';
+    if(sd.special)div.classList.add('locked');
+    else div.onclick=()=>openMemStar(idx+1,div);
+    document.body.appendChild(div);
+    setTimeout(()=>div.classList.add('show'),sd.d);
+  });
+  setTimeout(()=>catSay('Waitt...\nAre the stars moving ??','curious',3200),5200);
+  setTimeout(()=>catSay('Okayy 😭😭 wowwww','sad',2800),9600);
+  setTimeout(()=>catSay('💙 :3','dreamy',99999),13200);
+}
+const STAR_MSGS=[
+  "The way you laugh, smile,\neven your presence...\nit rewrites the whole room 🌸",
+  "You make my low and boring days\nenlightened every time I talk with you 💛",
+  "I wish the world were filled\nwith beautiful souls like you...",
+  "You're the kind of person\npeople write about",
+  "Thank you for showing up every time.\nYou mean a lot to everyone, to me.\nEven if the universe decides to separate us,\nI'll never forget you :3",
+  "I wish the best things happen to your life.\nMay the universe help you in every path you take\nand fulfill all of your dreams.\nYou deserve it !",
+  null
+];
+const STAR_POEM=`Cosmica !! :3, Do you ever think about parallel universes?
+I do sometimes.
+and in every version I imagine—
+Every different choice,
+Every different path,
+Every different timeline
+I hope I still find you.
+
+I hope there's a version where we meet in kindergarten.
+I hope there's one where we're old and still laughing hehehe.
+I hope there's one where we were detectives or scientists.
+
+But mostly I'm just grateful for this one.
+this exact timeline.
+This exact version.
+Where somehow, impossibly,
+You ended blessing me with your presence.
+
+Because even in my wildest imagination,
+I don't think I could have encountered someone like you.
+Someone who makes me feel
+Seen
+Safe
+Understood
+Lighter
+All at once.
+
+To me, you're not like other people, 
+you dont even lie on the spot of so called "other people 😭".
+You are precious to me and many, you are important !
+No matter whatever happens, I end up sharing things with you at the end of the day.
+And everytime im so excited to talk to you about anything, you have that kind of magicccc, jaaaduuu ✨✨✨.
+The most beautiful part is...
+I get to know you.
+I get to exist in the same little piece of time as you,
+to talk to you, laugh with you,
+to call you my friend.
+
+Some days that still feels unreal—
+and i dont say this but i cry sometimes thinking do i even deserve THIS MUCH 😭😭.. and i thank god for that 🙂.
+You are literally a Devii. 
+So thank you.
+
+For being real.
+For being here.
+For being exactly who you are.
+
+In this huge, messy universe,
+in this exact moment in time—
+I'm really glad
+I get to exist alongside you, i love you 😭🥺..`;
+
+let starModal=null;
+function openMemStar(idx,el){
+  if(el.classList.contains('locked'))return;
+  el.style.opacity='0.45';el.style.pointerEvents='none';
+  showStarModal(STAR_MSGS[idx-1],false,async()=>{
+    memStarsUnlocked++;
+    if(memStarsUnlocked>=6){
+      const s7=$('mstar-7');
+      if(s7&&s7.classList.contains('locked')){
+        s7.classList.remove('locked');s7.style.opacity='1';
+        let clicks=0,clickTimer=null;
+        s7.addEventListener('click',()=>{
+          clicks++;
+          if(clicks===1)clickTimer=setTimeout(()=>{clicks=0;},400);
+          else if(clicks>=2){
+            clearTimeout(clickTimer);clicks=0;s7.style.pointerEvents='none';
+            showStarModal(STAR_POEM,true,async()=>{
+              catSay('okay that one was a lot 😭','sad',4000);await wait(4800);catHideSpeech();
+              document.querySelectorAll('.mem-star').forEach(ms=>{
+                ms.style.transition='opacity 1.4s ease';ms.style.opacity='0';ms.style.pointerEvents='none';});
+              const p5=$('phase5');
+              if(p5){p5.style.transition='opacity 1.4s ease';p5.style.opacity='0';p5.style.pointerEvents='none';}
+              await wait(1600);
+              cakeCv.style.transition='opacity 1.4s ease';cakeCv.style.opacity='0.1';await wait(500);
+              setCatEmo('dreamy');catSay('...✦','dreamy',99999);
+              /* ★ TYFE — bright font with halo ★ */
+              await revealTyfe();
+              catHideSpeech();cakeCv.style.opacity='1';await wait(500);
+              showPhase(null);await wait(400);
+              /* two closing lines before phase 6 */
+              const wrap=document.createElement('div');
+              wrap.style.cssText='position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;';
+              const mkLine=()=>{const s=document.createElement('span');s.style.cssText="display:block;font-family:'Crimson Pro',serif;font-style:italic;font-weight:300;font-size:clamp(1rem,2.9vw,1.82rem);line-height:2.1;color:rgba(255,255,255,0.88);opacity:0;transition:opacity 0.5s ease;text-align:center;padding:0 2rem;";return s;};
+              const ta1=mkLine(),ta2=mkLine();wrap.appendChild(ta1);wrap.appendChild(ta2);
+              document.body.appendChild(wrap);
+              ta1.style.opacity='1';await typewriteEl(ta1,'Alrighttyyy...',60);await wait(500);
+              ta2.style.opacity='1';await typewriteEl(ta2,'Now lets have the cakeeee 😋😋',52);await wait(2000);
+              wrap.style.transition='opacity 1s ease';wrap.style.opacity='0';await wait(1100);wrap.remove();
+              await toPhase6();
+            });
+          }
+        });
+        catSay(" Huhhh Neiillll ?? Did you just-- \n do smth with the stars ??",'curious',3400);
+      }
+    }
+  });
+}
+function showStarModal(text,isPoem,onClose){
+  if(starModal)starModal.remove();
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(2,0,10,0.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.5s ease;padding:2rem;';
+  const box=document.createElement('div');
+  box.style.cssText=`max-width:520px;width:100%;background:rgba(8,4,22,0.7);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:${isPoem?'2.5rem 2rem':'2rem'};max-height:80vh;overflow-y:auto;`;
+  const textEl=document.createElement('p');
+  textEl.style.cssText=`font-family:'Crimson Pro',serif;font-style:italic;font-size:clamp(0.92rem,2vw,${isPoem?'1.05rem':'1.2rem'});line-height:${isPoem?'2':'1.85'};color:rgba(255,255,255,0.78);white-space:pre-line;text-align:${isPoem?'left':'center'};`;
+  textEl.textContent=text;
+  const cb=document.createElement('button');cb.textContent='✦ close ✦';
+  cb.style.cssText="display:block;margin:1.8rem auto 0;background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.35);font-family:'Crimson Pro',serif;font-style:italic;font-size:0.82rem;letter-spacing:0.3em;padding:0.5rem 1.6rem;border-radius:100px;cursor:pointer;transition:border-color 0.3s,color 0.3s;";
+  cb.onmouseover=()=>{cb.style.borderColor='rgba(245,200,66,0.3)';cb.style.color='rgba(255,255,255,0.7)';};
+  cb.onmouseout=()=>{cb.style.borderColor='rgba(255,255,255,0.12)';cb.style.color='rgba(255,255,255,0.35)';};
+  cb.onclick=()=>{overlay.style.opacity='0';setTimeout(()=>{overlay.remove();starModal=null;if(onClose)onClose();},500);};
+  box.appendChild(textEl);box.appendChild(cb);overlay.appendChild(box);document.body.appendChild(overlay);
+  starModal=overlay;setTimeout(()=>overlay.style.opacity='1',30);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 6  —  cut the cake  (10 lines)
+════════════════════════════════════════════════════════════════ */
+async function toPhase6(){
+  showPhase('phase6');setCatEmo('excited');catMoveTo(W()-140);await wait(700);
+  catSay("okay NOW\nwe're talking 🎂",'excited',2600);await wait(2900);
+  catSay("It took long enough\nthere it iss !! 🎂🍰",'excited',3000);await wait(3200);
+  showBtn('btn6');
+}
+async function cutTheCake(){
+  $('btn6').style.pointerEvents='none';$('btn6').classList.remove('show');$('btn6').style.opacity='0';
+  catSay("finally!! 🎂",'excited',2000);await wait(300);
+  await animateCutLines();catHideSpeech();
+  const fl=document.createElement('div');fl.className='t-flash';
+  document.body.appendChild(fl);setTimeout(()=>fl.remove(),400);
+  await wait(350);showPhase(null);await toPhase7();
+}
+async function animateCutLines(){
+  sparkCv.width=W();sparkCv.height=H();
+  const cx=W()/2, topY=H()*0.33-56, cakeH=172;
+  /* 10 cut lines spread across cake width */
+  const positions=[-45,-35,-25,-15,-5,5,15,25,35,45].map(o=>cx+o);
+  const done=[];
+  for(const x of positions){
+    let prog=0;
+    await new Promise(resolve=>{
+      (function grow(){
+        prog=Math.min(1,prog+0.10);
+        sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+        done.forEach(dx=>_drawCut(dx,1,topY,cakeH));
+        _drawCut(x,prog,topY,cakeH);
+        if(prog<1)requestAnimationFrame(grow);else resolve();
+      })();
+    });
+    done.push(x);await wait(42);
+  }
+  await wait(210);sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+}
+function _drawCut(x,prog,topY,h){
+  const lh=h*easeOut3(prog);sparkCtx.save();
+  const g=sparkCtx.createLinearGradient(x,topY,x,topY+lh);
+  g.addColorStop(0,'rgba(255,255,255,0.62)');g.addColorStop(1,'rgba(255,255,255,0.12)');
+  sparkCtx.strokeStyle=g;sparkCtx.lineWidth=1.2;sparkCtx.setLineDash([4,3]);
+  sparkCtx.shadowColor='rgba(255,220,150,0.4)';sparkCtx.shadowBlur=5;
+  sparkCtx.beginPath();sparkCtx.moveTo(x,topY);sparkCtx.lineTo(x,topY+lh);
+  sparkCtx.stroke();sparkCtx.restore();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 7  —  the heist  (cake vanishes after)
+════════════════════════════════════════════════════════════════ */
+async function toPhase7(){
+  setCatEmo('excited');
+  catWrap.style.transition='none';catSetPos(-100);await wait(40);
+  catWrap.style.transition='left 0.5s cubic-bezier(0.22,0.68,0,1.2)';
+  catSvg.style.transform='scaleX(1)';
+  catSvg.classList.remove('idle','talking');catSvg.classList.add('walking');
+  catSetPos(W()/2-46);await wait(320);
+  catSay('Muehehehehe 😈','excited',2200);
+  _spawnHeistSlices(7,W()/2,H()*0.33-20);await wait(700);catHideSpeech();
+  catWrap.style.transition='left 0.6s cubic-bezier(0.4,0,1,1)';catSetPos(W()+130);await wait(800);
+  /* cat peeks back */
+  catWrap.style.transition='left 0.4s ease-out';catSetPos(W()-82);await wait(500);
+  catSay('Okay, I left three 😈😈','smug',2800);await wait(3200);catHideSpeech();
+  catWrap.style.transition='left 0.5s ease-in';catSetPos(W()+130);await wait(700);
+  /* ── cake fades out completely ── */
+  cakeVisible=false;
+  cakeCv.style.transition='opacity 1s ease';cakeCv.style.opacity='0';
+  await wait(1100);await toPhase8();
+}
+function _spawnHeistSlices(count,fromX,fromY){
+  sparkCv.width=W();sparkCv.height=H();
+  const COLS=['#fff6ea','#ffe8f0','#f8b0d0','#c8b0f8','#fff4a0'];
+  const ps=Array.from({length:count},()=>({
+    x:fromX+(Math.random()-.5)*38,y:fromY+(Math.random()-.5)*28,
+    tx:W()/2-46+46,ty:H()-170,prog:0,spd:.042+Math.random()*.025,
+    w:16+Math.random()*10,h:11+Math.random()*7,
+    col:COLS[Math.floor(Math.random()*COLS.length)],angle:(Math.random()-.5)*.5}));
+  (function loop(){sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);let alive=false;
+    ps.forEach(p=>{p.prog=Math.min(1,p.prog+p.spd);if(p.prog<1)alive=true;
+      const e=easeOut3(p.prog),px=p.x+(p.tx-p.x)*e,py=p.y+(p.ty-p.y)*e;
+      sparkCtx.save();sparkCtx.translate(px,py);sparkCtx.rotate(p.angle*(1-p.prog));
+      sparkCtx.globalAlpha=(1-p.prog*.72);sparkCtx.fillStyle=p.col;
+      sparkCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      sparkCtx.fillStyle='rgba(248,176,208,0.85)';sparkCtx.fillRect(-p.w/2,-p.h/2,p.w,4);
+      sparkCtx.restore();});
+    sparkCtx.globalAlpha=1;
+    if(alive)requestAnimationFrame(loop);else sparkCv.width=sparkCv.width;})();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 8  —  three slices + photos + eating audio
+════════════════════════════════════════════════════════════════ */
+let slicesOpened=0;
+async function toPhase8(){
+  catWrap.style.transition='left 1.4s cubic-bezier(0.34,1.08,0.64,1)';
+  catSetPos(W()-140);catSvg.style.transform='scaleX(1)';
+  catSvg.classList.remove('walking');catSvg.classList.add('idle');
+  setCatEmo('happy');slicesOpened=0;
+  _ensurePhotos();
+  const pN=$('photoNeil'),pC=$('photoCosmii');
+  if(pN)pN.style.opacity='1';if(pC)pC.style.opacity='1';
+  await wait(900);catSay('Pick one by one 😌','smug',2800);await wait(3200);
+  _spawnThreeSlices();
+}
+function _ensurePhotos(){
+  if($('photoNeil'))return;
+  const sz=Math.round(Math.min(W(),H())*0.11);
+  [['photoNeil','src/images/neil.jpg','right:3%;bottom:20%;',0],
+   ['photoCosmii','src/images/cosmica.jpg','left:3%;bottom:20%;',180]].forEach(([id,src,pos,delay])=>{
+    const d=document.createElement('div');d.id=id;d.className='photo-frame';
+    d.style.cssText=`width:${sz}px;height:${sz}px;${pos}`;
+    d.innerHTML=`<img src="${src}" alt="${id}"/>`;document.body.appendChild(d);
+    setTimeout(()=>d.classList.add('show-anim'),delay);});
+}
+function _spawnThreeSlices(){
+  const cy=H()*0.33;
+  [{id:'sl1',xf:.22,fn:openSlice1},{id:'sl2',xf:.5,fn:openSlice2},{id:'sl3',xf:.78,fn:openSlice3}]
+  .forEach((d,i)=>{
+    const wrap=document.createElement('div');wrap.id=d.id;wrap.className='slice-piece';
+    wrap.style.left=(d.xf*W()-40)+'px';wrap.style.top=(cy-35)+'px';
+    wrap.innerHTML='<div class="slice-inner"><div class="slice-frosting"></div></div><div class="slice-label"></div>';
+    wrap.onmouseenter=()=>{if(!wrap.dataset.opened)wrap.style.transform='translateY(-8px) scale(1.08)';};
+    wrap.onmouseleave=()=>{if(!wrap.dataset.opened)wrap.style.transform='';};
+    wrap.onclick=()=>d.fn(wrap);
+    document.body.appendChild(wrap);
+    setTimeout(()=>wrap.classList.add('show'),380+i*300);
+  });
+}
+
+/* ── FIXED: photo glows then fades smoothly, slice flies to that corner ── */
+async function openSlice1(el){
+  if(el.dataset.opened)return;el.dataset.opened='1';el.style.pointerEvents='none';
+  el.style.transform='translateY(-20px) scale(1.16)';
+  el.style.filter='drop-shadow(0 16px 40px rgba(245,200,66,0.9))';
+  el.querySelector('.slice-label').textContent="this one's for you ✦";
+  el.querySelector('.slice-label').style.color='rgba(245,200,66,0.95)';
+  catSay("This one's for the special.",'dreamy',3800);
+  const pC=$('photoCosmii');
+  /* photo glows then fades — opacity transition is in CSS so this always works */
+  if(pC){
+    pC.classList.add('glow');
+    await wait(250);
+    pC.style.opacity='0';
+  }
+  playAudio('src/audio/cosmieating.mp3',0.85);
+  await wait(320);
+  /* slice flies toward Cosmii's corner (left side, bottom), shrinks and tilts */
+  const destX = Math.round(W()*0.03);
+  const destY = Math.round(H()*0.80);
+  el.style.transition='opacity 1.4s ease, transform 1.5s cubic-bezier(0.4,0,0.2,1), left 1.5s cubic-bezier(0.4,0,0.2,1), top 1.5s cubic-bezier(0.4,0,0.2,1)';
+  el.style.left=destX+'px';
+  el.style.top=destY+'px';
+  el.style.transform='scale(0.08) rotate(-18deg)';
+  el.style.opacity='0';
+  await wait(1600);
+  slicesOpened++;checkSlicesDone();
+}
+
+async function openSlice2(el){
+  if(el.dataset.opened)return;el.dataset.opened='1';el.style.pointerEvents='none';
+  el.style.transform='translateY(-20px) scale(1.16)';
+  el.style.filter='drop-shadow(0 16px 40px rgba(192,156,240,0.9))';
+  el.querySelector('.slice-label').textContent='yo ta merai ho 😺';
+  el.querySelector('.slice-label').style.color='rgba(192,156,240,0.95)';
+  catSay("Neil is gonna have this one 😶",'smug',3000);
+  const pN=$('photoNeil');
+  /* photo glows then fades — opacity transition is in CSS so this always works */
+  if(pN){
+    pN.classList.add('glow');
+    await wait(250);
+    pN.style.opacity='0';
+  }
+  playAudio('src/audio/neileating.mp3',0.85);
+  await wait(320);
+  /* cat teleport bite animation */
+  catWrap.style.transition='left 0.36s ease-in';catSetPos(W()+80);
+  await wait(420);catWrap.style.transition='left 0.7s cubic-bezier(0.34,1.08,0.64,1)';catSetPos(W()-140);
+  await wait(200);
+  /* slice flies toward Neil's corner (right side, bottom), shrinks and tilts other way */
+  const destX = Math.round(W()*0.92);
+  const destY = Math.round(H()*0.80);
+  el.style.transition='opacity 1.4s ease, transform 1.5s cubic-bezier(0.4,0,0.2,1), left 1.5s cubic-bezier(0.4,0,0.2,1), top 1.5s cubic-bezier(0.4,0,0.2,1)';
+  el.style.left=destX+'px';
+  el.style.top=destY+'px';
+  el.style.transform='scale(0.08) rotate(18deg)';
+  el.style.opacity='0';
+  await wait(1600);
+  slicesOpened++;checkSlicesDone();
+}
+
+async function openSlice3(el){
+  if(el.dataset.opened)return;el.dataset.opened='1';el.style.pointerEvents='none';
+  el.querySelector('.slice-label').textContent='For the cosmos';
+  el.querySelector('.slice-label').style.color='rgba(116,240,216,0.95)';
+  el.style.filter='drop-shadow(0 0 24px rgba(116,240,216,0.75))';
+  catSay('This one is for the Cosmos','dreamy',3800);await wait(600);
+  el.style.transition=`opacity 2.6s ease,transform 3.2s cubic-bezier(0.16,0.84,0.44,1)`;
+  el.style.transform=`translateY(-${Math.round(H()*.68)}px) scale(0.08)`;
+  el.style.opacity='0';await wait(3400);slicesOpened++;checkSlicesDone();
+}
+async function checkSlicesDone(){
+  if(slicesOpened<3)return;
+  await wait(700);
+  ['sl1','sl2','sl3'].forEach(id=>{const e=$(id);if(e)e.remove();});
+  /* completely remove all memory stars */
+  document.querySelectorAll('.mem-star').forEach(ms=>ms.remove());
+  /* completely remove both photo frames */
+  ['photoNeil','photoCosmii'].forEach(id=>{const e=$(id);if(e)e.remove();});
+  await toPhase9();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 9
+════════════════════════════════════════════════════════════════ */
+async function toPhase9(){
+  showPhase('phase9');setCatEmo('dreamy');catMoveTo(W()-140);await wait(1000);
+  await typewrite('l9-1','And nowww....',70);await wait(1000);
+  await typewrite('l9-2','A quiet moment.....',64);await wait(1200);
+  await typewrite('l9-3','This one is for youuuuu :3',60);await wait(1800);
+  catSay('Neil has something more\nto tell you 😭','dreamy',4000);await wait(4600);
+  showPhase(null);await toPhase10();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 10  —  the letter
+════════════════════════════════════════════════════════════════ */
+const LETTER_PARAS=[
+  "I made this because no message felt big enough,\nno card felt real enough.\nYou deserve something that takes up space in the world.",
+  "Something that will still be here on the days when you need a reminder\nof how deeply you are loved.\nSo I built you a little corner of the universe.\nJust yours.",
+  "You are one of those people who makes everyone around them feel like they matter —\nand you probably don't even know you do it.\nThat is the rarest thing.",
+  "Happy birthday.\nYou are loved.\nFiercely, wholly, cosmically. \n I hope god fulfills your life with all the happiness you deserve :3"
+];
+async function toPhase10(){
+  showPhase('phase10');setCatEmo('closed');catHideSpeech();await wait(800);
+  showScrollCue();
+  for(let i=0;i<LETTER_PARAS.length;i++){
+    const el=$('lp'+(i+1));if(!el)continue;
+    el.textContent=LETTER_PARAS[i];await wait(180);el.classList.add('on');
+    await wait(Math.max(2600,LETTER_PARAS[i].length*40));
+  }
+  await wait(500);const sign=$('lsign');if(sign)sign.classList.add('on');
+  await wait(1600);catSay("😌🌙",'dreamy',4200);await wait(4600);
+  showBtn('btn10');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 11  —  ending
+════════════════════════════════════════════════════════════════ */
+async function toPhase11(){
+  $('btn10').style.pointerEvents='none';$('btn10').classList.remove('show');$('btn10').style.opacity='0';
+  showPhase(null);setCatEmo('happy');catMoveTo(W()-140);await wait(700);
+  catSay('Okay...','dreamy',1800);await wait(2200);
+  catSay('See you soon\nHave a great year birthday girl !','dreamy',4800);await wait(5200);
+  catHideSpeech();
+  catWrap.style.transition='left 2.5s cubic-bezier(0.4,0,1,1)';
+  catSvg.classList.remove('idle');catSvg.classList.add('walking');catSetPos(W()+240);
+  await wait(2700);
+  bgCv.style.transition='opacity 2.2s ease';bgCv.style.opacity='0.12';
+  cakeCv.style.transition='opacity 2.2s ease';cakeCv.style.opacity='0';
+  await wait(2000);
+  /* skip particle text formations — go straight to birthday wish */
+  await showBirthdayWishScene();
+  /* fade to black then restart button */
+  $('endingOverlay').classList.add('on');await wait(2600);$('restartBtn').classList.add('on');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BIRTHDAY WISH SCENE  +  wish.mp3
+════════════════════════════════════════════════════════════════ */
+async function showBirthdayWishScene(){
+  const scene=$('birthdayWishScene'),txt=$('birthdayWishText');
+  scene.classList.add('on');await wait(400);
+  /* faint starfield bloom on text appear */
+  _wishBloom();
+  txt.classList.add('on');
+  const aud=playAudio('src/audio/wish.mp3',1);
+  await new Promise(resolve=>{
+    if(!aud){setTimeout(resolve,6500);return;}
+    aud.addEventListener('ended',()=>setTimeout(resolve,3000));
+    aud.addEventListener('error',()=>setTimeout(resolve,6500));
+    setTimeout(resolve,16000);
+  });
+  txt.classList.remove('on');await wait(1200);scene.classList.remove('on');await wait(1800);
+}
+function _wishBloom(){
+  const COLS=['#f5c842','#ffe8a0','#ffffff','#c09cf0','#74f0d8'];
+  const ps=Array.from({length:55},()=>({
+    x:Math.random()*W(),y:Math.random()*H(),
+    vx:(Math.random()-.5)*0.6,vy:(Math.random()-.5)*0.6,
+    r:Math.random()*2.2+0.4,
+    col:COLS[Math.floor(Math.random()*COLS.length)],
+    life:0.6+Math.random()*0.4,dec:0.005+Math.random()*0.004
+  }));
+  (function loop(){
+    let alive=false;
+    ps.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.life-=p.dec;
+      if(p.life<=0)return;alive=true;
+      sparkCtx.beginPath();sparkCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      sparkCtx.fillStyle=p.col;sparkCtx.globalAlpha=p.life*0.75;sparkCtx.fill();
+    });
+    sparkCtx.globalAlpha=1;
+    if(alive)requestAnimationFrame(loop);
+  })();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════════════════ */
+window.addEventListener('load',()=>{
+  catWrap.style.bottom=CAT.bottom+'px';
+  catWrap.style.left=(W()+60)+'px';
+  catWrap.style.transition='left 1.3s cubic-bezier(0.34,1.08,0.64,1)';
+  knifeEl.style.display='none';knifeEl.style.opacity='0';
+  sparkCv.width=W();sparkCv.height=H();
+  runPhase1();
+});
+</script>
+</body>
+</html>
